@@ -28,6 +28,7 @@ namespace SmashBotUltimate {
             services.AddSingleton<IResultService, ResultService> ();
             services.AddSingleton<IGuildService, GuildService> ();
             services.AddSingleton<IChannelRedirectionService, ChannelRedirectionService> ();
+            services.AddSingleton<IRandomUtilitiesService, RandomUtilitiesService> ();
 
             //TODO: This creates another copy of the serivces, find another way.
             services.AddSingleton<SmashBot> (new SmashBot (services.BuildServiceProvider ()));

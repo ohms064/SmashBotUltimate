@@ -32,7 +32,7 @@ namespace SmashBotUltimate.Bot {
             Client.Ready += OnClientReady;
 
             Client.UseInteractivity (new InteractivityConfiguration {
-                Timeout = TimeSpan.FromMinutes (2)
+                Timeout = TimeSpan.FromSeconds (20)
             });
 
             var commandsConfig = new CommandsNextConfiguration {
@@ -43,7 +43,9 @@ namespace SmashBotUltimate.Bot {
             };
 
             var commands = Client.UseCommandsNext (commandsConfig);
+
             commands.RegisterCommands<ReportCommands> ();
+            commands.RegisterCommands<InfoCommands> ();
 
             Client.ConnectAsync ();
         }
