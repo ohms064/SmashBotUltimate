@@ -4,17 +4,21 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using SmashBotUltimate.Bot.Extensions;
 using SmashBotUltimate.Bot.Models;
 using SmashBotUltimate.Bot.Modules;
+using SmashBotUltimate.Bot.Modules.InstructionService;
 
 namespace SmashBotUltimate.Bot.Commands {
-    public class ReportCommands : BaseCommands {
+    public class ReportCommands : BaseCommandModule {
         public IResultService ResultService { get; set; }
         public IChannelRedirectionService ChannelRedirection { get; set; }
 
         public IRandomUtilitiesService RandomService { get; set; }
 
         public IGuildService GuildService { get; set; }
+
+        public IInteractionService<CoinTossResult> CoinTossService { get; set; }
 
         private const string Head = "heads",
             Tails = "tails";
@@ -29,36 +33,19 @@ namespace SmashBotUltimate.Bot.Commands {
 
         public async Task BeginBattle (CommandContext context, [Description ("El usuario al que retarás")] DiscordMember adversary, [RemainingText] string text) {
             var callingMember = context.Member;
-            var interactivity = context.Client.GetInteractivity ();
 
             var startingMember = RandomService.PickOne (callingMember, adversary);
             var otherMember = startingMember == callingMember ? adversary : callingMember;
-            var message = $"{callingMember.Mention} reta a {adversary.Mention}.\n{startingMember.Mention} escribe Heads o Tails";
-            await ReplyAsync (context, message);
-            //?A lo mejor usar otro bot existente?
 
-            var resultMessage = await interactivity.WaitForMessageAsync (SameChannelResponse (context, (x) => x.Author == startingMember));
+            var message = $"{callingMember.Mention} reta a {adversary.Mention}.";
+            await context.ReplyAsync (message);
 
-            if (resultMessage.TimedOut) {
-                await ReplyAsync (context, $"¡No hubo respuesta de {startingMember.Mention}! Vuelve a intenarlo.");
-                return;
-            }
-            var coinResult = RandomService.PickOne (Head, Tails);
-            var expectedResult = resultMessage.Result.Content.Trim ().ToLower (); //Limpiamos el string de caracteres de espacio
+            var startingWon = await CoinTossService.BeginInteraction (context, startingMember);
+            var winner = startingWon.successGuess ? startingMember : otherMember;
+            var loser = startingWon.successGuess ? otherMember : startingMember;
 
-            if (!expectedResult.StartsWith (Tails[0]) && !expectedResult.StartsWith (Head[0])) {
-                await ReplyAsync (context, $"{startingMember.Mention} no elegiste bien!");
-                return;
-            }
+            await context.ReplyAsync ($"{winner.DisplayName} has ganado! {winner.DisplayName} baneas un escenario, {loser.DisplayName} banea dos y {winner.DisplayName} escoge escenarios.");
 
-            await ReplyAsync (context, $"Tirando... Salió {coinResult}.");
-
-            var startingWon = resultMessage.Result.Content.StartsWith (coinResult[0]); //solo comparamos la primera letra, por si hay un typo.
-
-            var winner = startingWon ? startingMember : otherMember;
-            var loser = startingWon ? otherMember : startingMember;
-            await ReplyAsync (context, $"{winner.DisplayName} has ganado! {winner.DisplayName} baneas un escenario, {loser.DisplayName} banea dos y {winner.DisplayName} escoge escenarios.");
-            context.Client.GetCommandsNext ().FindCommand <
         }
 
         /// <summary>
@@ -72,22 +59,22 @@ namespace SmashBotUltimate.Bot.Commands {
         public async Task Victoria (CommandContext context, [Description ("El usuario al que le ganaste")] DiscordMember targetUser = null, [RemainingText] string resultStr = null) {
             var callingUser = context.Member;
             if (callingUser == null) {
-                await ReplyAsync (context, "WTF, quién me escribió");
+                await context.ReplyAsync ("WTF, quién me escribió");
                 return;
             }
 
             if (targetUser == null) {
-                await ReplyAsync (context, "Faltó escribir el oponente.");
+                await context.ReplyAsync ("Faltó escribir el oponente.");
                 return;
             }
 
             if (targetUser.IsBot) {
-                await ReplyAsync (context, "No puedes reportar una victoria contra un bot!");
+                await context.ReplyAsync ("No puedes reportar una victoria contra un bot!");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace (resultStr)) {
-                await ReplyAsync (context, "Faltó escribir el resultado");
+                await context.ReplyAsync ("Faltó escribir el resultado");
                 return;
             }
 
@@ -109,15 +96,15 @@ namespace SmashBotUltimate.Bot.Commands {
                     channel = GuildService.FindTextChannel (context, channelName);
 
                     if (channel == null) {
-                        await ReplyAsync (context, $"{generalMessage}");
+                        await context.ReplyAsync ($"{generalMessage}");
                         return;
                     }
                 }
 
                 await GuildService.SendMessageToTextChannel (channel, generalMessage, admins);
-                await ReplyAsync (context, $"{generalMessage}");
+                await context.ReplyAsync ($"{generalMessage}");
             } else {
-                await ReplyAsync (context, $"No se escribió bien el resultado: {resultStr}. Ejemplo: 2-1");
+                await context.ReplyAsync ($"No se escribió bien el resultado: {resultStr}. Ejemplo: 2-1");
             }
 
         }

@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SmashBotUltimate.Bot;
 using SmashBotUltimate.Bot.Modules;
+using SmashBotUltimate.Bot.Modules.InstructionService;
 using SmashBotUltimate.Models;
 namespace SmashBotUltimate {
     public class Startup {
@@ -29,9 +30,17 @@ namespace SmashBotUltimate {
             services.AddSingleton<IGuildService, GuildService> ();
             services.AddSingleton<IChannelRedirectionService, ChannelRedirectionService> ();
             services.AddSingleton<IRandomUtilitiesService, RandomUtilitiesService> ();
+            services.AddSingleton<IInteractionService<CoinTossResult>, CoinTossService> (
+                (serviceProvider) => {
+                    return new CoinTossService (5, serviceProvider.GetService<IRandomUtilitiesService> ());
+                }
+            );
 
-            //TODO: This creates another copy of the serivces, find another way.
-            services.AddSingleton<SmashBot> (new SmashBot (services.BuildServiceProvider ()));
+            //TODO: BuildServiceProvider creates another copy of the serivces, find another way.
+            //!Using a factory like in CoinTossService we could pass the service provider but we must find a way to initialize the bot
+            //?Maybe configure will make it work?
+            var serviceProvider = services.BuildServiceProvider ();
+            services.AddSingleton<SmashBot> (new SmashBot (serviceProvider));
 
             services.AddControllers ();
         }
