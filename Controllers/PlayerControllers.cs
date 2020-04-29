@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using SmashBotUltimate.Models;
@@ -16,67 +17,46 @@ namespace SmashBotUltimate.Controllers {
     [ApiController]
     public class PlayerController : ControllerBase {
 
+        public PlayerContext Context { get; set; }
+        public PlayerController (PlayerContext context) {
+            Context = context;
+        }
+
         #region HttpGets
 
         [HttpGet ()]
         public IActionResult GetPlayers () {
-            using (var context = new PlayerContext ()) {
-                Player[] result = GetAllPlayers (context);
+            Player[] result = GetAllPlayers (Context);
 
-                if (result == null) {
-                    return NotFound ();
-                }
-                return Ok (result);
+            if (result == null) {
+                return NotFound ();
             }
+            return Ok (result);
 
         }
 
         [HttpGet ("{id}")]
         public IActionResult GetPlayer (int id) {
 
-            using (var context = new PlayerContext ()) {
-                Player result = GetPlayerWithId (id, context);
+            Player result = GetPlayerWithId (id, Context);
 
-                if (result == null) {
-                    return NotFound ();
-                }
-                return Ok (result);
+            if (result == null) {
+                return NotFound ();
             }
+            return Ok (result);
 
-        }
-
-        [HttpGet ("{id1}/{id2}/{topic}")]
-        public IActionResult GetPlayersMatches (int id1, int id2, string topic) {
-
-            using (var context = new PlayerContext ()) {
-                Player firstPlayer = GetPlayerWithId (id1, context);
-                if (firstPlayer == null)
-                    return NotFound ();
-
-                Player secondPlayer = GetPlayerWithId (id2, context);
-                if (secondPlayer == null)
-                    return NotFound ();
-
-                Match result = GetPlayerMatches (ref firstPlayer, ref secondPlayer, context, topic, false);
-                if (result == null) {
-                    return NotFound ();
-                }
-
-                return Ok (result);
-            }
         }
 
         [Route ("name")]
         [HttpGet ("{name}")]
         public IActionResult GetPlayerByName (string name) {
 
-            using (var context = new PlayerContext ()) {
-                Player[] result = GetPlayersWithName (name, context);
-                if (result == null || result.Length == 0) {
-                    return NotFound ();
-                }
-                return Ok ();
+            Player result = GetPlayerWithName (name, Context);
+            if (result == null) {
+                return NotFound ();
             }
+            return Ok ();
+
         }
         #endregion
 
@@ -85,10 +65,30 @@ namespace SmashBotUltimate.Controllers {
         [HttpPost]
         public IActionResult AddPlayer ([FromBody] Player data) {
             if (data == null) return BadRequest ();
-            using (var context = new PlayerContext ()) {
-                context.Add<Player> (data);
-                context.SaveChanges ();
+
+            var existingPlayer = GetPlayerWithName (data.Name, Context);
+
+            if (existingPlayer != null) {
+                var receivingGuild = data.GuildPlayers.FirstOrDefault ();
+                receivingGuild.PlayerId = existingPlayer.PlayerId;
+                receivingGuild.Player = existingPlayer;
+
+                if (receivingGuild != null && !existingPlayer.HasGuildId (receivingGuild.GuildId)) {
+                    existingPlayer.GuildPlayers.Add (receivingGuild);
+
+                    Context.Update<Player> (existingPlayer);
+                } else {
+                    return BadRequest ("Received player already exists but no new guild was provided or guild already exists");
+                }
+            } else {
+                try {
+                    Context.Add<Player> (data);
+                } catch (Exception e) {
+                    return BadRequest (e);
+                }
             }
+            Context.SaveChanges ();
+
             return Ok ();
         }
 
@@ -96,36 +96,10 @@ namespace SmashBotUltimate.Controllers {
         [HttpPut]
         public IActionResult AddPlayerNickname ([FromBody] Nickname data) {
             if (data == null) return BadRequest ();
-            using (var context = new PlayerContext ()) {
-                context.Add<Nickname> (data);
-                context.SaveChanges ();
-            }
+            Context.Add<Nickname> (data);
+            Context.SaveChanges ();
+
             return Ok ();
-        }
-
-        [Route ("setmatch")]
-        [HttpPost]
-        public IActionResult SetPlayersMatch ([FromBody] TwoIds json) {
-            int winnerId = json.WinnerId;
-            int loserId = json.LoserId;
-            string topic = json.Topic ?? Match.DefaultTopic;
-            using (var context = new PlayerContext ()) {
-                var winner = GetPlayerWithId (winnerId, context);
-                if (winner == null) {
-                    return BadRequest ();
-                }
-                var loser = GetPlayerWithId (loserId, context);
-                if (loser == null) {
-                    return BadRequest ();
-                }
-
-                var result = GetPlayerMatches (ref winner, ref loser, context, topic, true);
-
-                result.PendingFight = true;
-                context.SaveChanges ();
-
-                return Ok (result);
-            }
         }
 
         /// <summary>
@@ -137,49 +111,23 @@ namespace SmashBotUltimate.Controllers {
         /// <param name="id1">The winner's id</param>
         /// <param name="id2">The loser's id</param>
         /// <returns></returns>
-        [Route ("completematch")]
-        [HttpPost]
-        public IActionResult CompletePlayersMatch ([FromBody] TwoIds json) {
-            int id1 = json.WinnerId;
-            int id2 = json.LoserId;
-            string topic = json.Topic ?? Match.DefaultTopic;
-            using (var context = new PlayerContext ()) {
-                var winner = GetPlayerWithId (id1, context);
-                if (winner == null) {
-                    return BadRequest ();
-                }
-                var loser = GetPlayerWithId (id2, context);
-                if (loser == null) {
-                    return BadRequest ();
-                }
-
-                var result = GetPlayerMatches (ref winner, ref loser, context, topic, false);
-                if (result == null) {
-                    return BadRequest ("Match has not been set to start.");
-                }
-                if (!result.PendingFight) {
-                    return BadRequest ("No match is pending");
-                }
-                result.WinCount++;
-                result.PendingFight = false;
-                context.Update<Match> (result);
-                context.SaveChanges ();
-                return Ok (result);
-            }
-
-        }
         #endregion
 
         #region Aux Functions
 
-        private Player[] GetAllPlayers (PlayerContext context) {
+        /// <summary>
+        /// Returns an array of all Players saved in the database.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static Player[] GetAllPlayers (PlayerContext context) {
             Player[] result = null;
 
-            result = (from p in context.Players select p).ToArray ();
+            result = (from p in context.Players.AsNoTracking () select p).ToArray ();
 
             return result;
         }
-        private Player GetPlayerWithId (int id, PlayerContext context) {
+        public static Player GetPlayerWithId (int id, PlayerContext context) {
             Player result = null;
 
             result = (from p in context.Players where p.PlayerId == id select p).FirstOrDefault ();
@@ -187,9 +135,9 @@ namespace SmashBotUltimate.Controllers {
             return result;
         }
 
-        private Player[] GetPlayersWithName (string name, PlayerContext context) {
-            Player[] result = null;
-            result = (from p in context.Players where p.Name == name select p).ToArray ();
+        public static Player GetPlayerWithName (string name, PlayerContext context) {
+            Player result = null;
+            result = (from p in context.Players where p.Name == name select p).FirstOrDefault ();
             return result;
         }
 
@@ -201,34 +149,6 @@ namespace SmashBotUltimate.Controllers {
         /// <param name="context"></param>
         /// <param name="topic"></param>
         /// <returns></returns>
-        private Match GetPlayerMatches (ref Player winner, ref Player opposing, PlayerContext context, string topic, bool create) {
-            Match result = null;
-            if (winner.PlayerMatches == null) {
-                winner.PlayerMatches = new List<Match> ();
-            }
-            if (winner.OpponentMatches == null) {
-                winner.OpponentMatches = new List<Match> ();
-            }
-
-            int playerId = winner.PlayerId;
-            int opposingId = opposing.PlayerId;
-
-            result = (from p in winner.PlayerMatches where p.OpponentPlayerId == opposingId && p.Topic.Equals (topic) select p).FirstOrDefault ();
-            if (result == null && create) {
-                //We didn't find any match, so we create it.
-                result = new Match {
-                OpponentPlayerId = opposingId,
-                OpponentPlayer = opposing,
-                Topic = topic ?? "general"
-                };
-
-                winner.PlayerMatches.Add (result);
-                winner.OpponentMatches.Add (result);
-                context.Matches.Add (result);
-
-            }
-            return result;
-        }
         #endregion
     }
 }

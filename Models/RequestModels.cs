@@ -4,4 +4,8 @@ namespace Backend.Models {
         public int LoserId { get; set; }
         public string Topic { get; set; }
     }
+
+    public class OneId {
+        public int PlayerId { get; set; }
+    }
 }

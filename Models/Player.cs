@@ -18,6 +18,7 @@ namespace SmashBotUltimate.Models {
         public DbSet<Nickname> PlayerNicknames { get; set; }
         public DbSet<Guild> Guilds { get; set; }
         public DbSet<GuildPlayer> GuildPlayers { get; set; }
+
         protected override void OnConfiguring (DbContextOptionsBuilder optionsBuilder) {
             optionsBuilder.UseSqlite ("Data Source=inscripcion.db");
         }
@@ -33,6 +34,10 @@ namespace SmashBotUltimate.Models {
 
             builder.Entity<Player> ().Property (p => p.PlayerId).ValueGeneratedOnAdd ();
             builder.Entity<Match> ().Property (p => p.Id).ValueGeneratedOnAdd ();
+
+            builder.Entity<Player> ()
+                .HasIndex (p => p.Name)
+                .IsUnique ();
 
             builder.Entity<GuildPlayer> ()
                 .HasOne (gp => gp.Player)
@@ -75,6 +80,7 @@ namespace SmashBotUltimate.Models {
     public class Player {
 
         public int PlayerId { get; set; }
+        //Unique, should be Discord username#discriminator
         public string Name { get; set; }
 
         public int Nivel { get; set; }
@@ -85,6 +91,14 @@ namespace SmashBotUltimate.Models {
         public virtual ICollection<Nickname> Nicknames { get; set; }
 
         public virtual ICollection<GuildPlayer> GuildPlayers { get; set; }
+
+        public bool HasGuildId (int id) {
+            foreach (var g in GuildPlayers) {
+                if (g.GuildId == id)
+                    return true;
+            }
+            return false;
+        }
     }
 
     public class Nickname {
