@@ -13,89 +13,140 @@ namespace SmashBotUltimate.Models {
 
     public class PlayerContext : DbContext {
         public DbSet<Player> Players { get; set; }
-        public DbSet<PlayerScore> PlayerScore { get; set; }
-        public DbSet<PlayerNickname> PlayerNickname { get; set; }
+        public DbSet<Match> Matches { get; set; }
+        //public DbSet<PlayerMatch> PlayerMatches { get; set; }
+        public DbSet<Nickname> PlayerNicknames { get; set; }
+        public DbSet<Guild> Guilds { get; set; }
+        public DbSet<GuildPlayer> GuildPlayers { get; set; }
         protected override void OnConfiguring (DbContextOptionsBuilder optionsBuilder) {
             optionsBuilder.UseSqlite ("Data Source=inscripcion.db");
         }
 
         protected override void OnModelCreating (ModelBuilder builder) {
+
             builder.Entity<Player> ().HasKey (p => p.PlayerId);
-            builder.Entity<PlayerScore> ().HasKey (c => new { c.Player1Id, c.Player2Id });
-            builder.Entity<PlayerNickname> ().HasKey (p => p.NicknameId);
+            builder.Entity<Match> ().HasKey (c => c.Id);
+            //builder.Entity<PlayerMatch> ().HasKey (c => new { c.MatchId, c.PlayerId });
+            builder.Entity<Nickname> ().HasKey (p => p.NicknameId);
+            builder.Entity<Guild> ().HasKey (propertyNames => propertyNames.Id);
+            builder.Entity<GuildPlayer> ().HasKey (propertyNames => new { propertyNames.GuildId, propertyNames.PlayerId });
 
             builder.Entity<Player> ().Property (p => p.PlayerId).ValueGeneratedOnAdd ();
-            builder.Entity<PlayerScore> ()
-                .HasOne (p => p.Player1)
-                .WithMany (p => p.PlayerMatches)
-                .HasForeignKey (p => p.Player1Id)
-                .IsRequired ();
+            builder.Entity<Match> ().Property (p => p.Id).ValueGeneratedOnAdd ();
 
-            builder.Entity<PlayerScore> ()
-                .HasOne (p => p.Player2)
-                .WithMany (p => p.PlayerMatches)
-                .HasForeignKey (p => p.Player2Id)
-                .IsRequired ();
+            builder.Entity<GuildPlayer> ()
+                .HasOne (gp => gp.Player)
+                .WithMany (player => player.GuildPlayers)
+                .HasForeignKey (gp => gp.PlayerId);
 
-            //builder.Entity<
+            builder.Entity<GuildPlayer> ()
+                .HasOne (gp => gp.Guild)
+                .WithMany (guild => guild.GuildPlayers)
+                .HasForeignKey (gp => gp.GuildId);
+            /*
+                        builder.Entity<PlayerMatch> ()
+                            .HasOne (p => p.Player)
+                            .WithMany (p => p.PlayerMatches)
+                            .HasForeignKey (p => p.PlayerId);
+
+                        builder.Entity<PlayerMatch> ()
+                            .HasOne (p => p.Match)
+                            .WithOne (p => p.PlayerMatch);
+            ¨*/
+            builder.Entity<Match> ()
+                .HasOne (m => m.OpponentPlayer)
+                .WithMany (p => p.OpponentMatches)
+                .HasForeignKey (p => p.OpponentPlayerId);
+
             builder.Entity<Player> ()
                 .HasMany (p => p.PlayerMatches);
 
-            builder.Entity<PlayerNickname> ()
-                .HasOne (p => p.Player)
-                .WithMany (p => p.Nickname)
+            builder.Entity<Nickname> ()
+                .HasOne (p => p.OriginPlayer)
+                .WithMany (p => p.Nicknames)
                 .HasForeignKey (p => p.PlayerId);
 
-            builder.Entity<Player> ().
-            HasMany (p => p.Nickname);
+            builder.Entity<Player> ()
+                .HasMany (p => p.Nicknames);
+
         }
     }
 
     public class Player {
 
         public int PlayerId { get; set; }
-
         public string Name { get; set; }
 
         public int Nivel { get; set; }
-        public virtual ICollection<PlayerScore> PlayerMatches { get; set; }
+        public virtual ICollection<Match> PlayerMatches { get; set; }
 
-        public virtual ICollection<PlayerNickname> Nickname { get; set; }
+        public virtual ICollection<Match> OpponentMatches { get; set; }
+
+        public virtual ICollection<Nickname> Nicknames { get; set; }
+
+        public virtual ICollection<GuildPlayer> GuildPlayers { get; set; }
     }
 
-    public class PlayerNickname {
+    public class Nickname {
 
         public int NicknameId { get; set; }
         public string Platform { get; set; }
-        public string Nickname { get; set; }
+        public string Name { get; set; }
+
+        public int PlatformId { get; set; }
 
         public int PlayerId { get; set; }
 
-        public virtual Player Player { get; set; }
+        [JsonIgnore]
+        public virtual Player OriginPlayer { get; set; }
     }
 
-    public class PlayerScore {
-        public int Player1Id {
-            get;
-            set;
-        }
+    public class Match {
+        public const string DefaultTopic = "general";
+        public int Id { get; set; }
 
-        public int Player2Id {
-            get;
-            set;
-        }
+        public int OpponentPlayerId { get; set; }
 
-        public virtual Player Player1 { get; set; }
+        [JsonIgnore]
+        public Player OpponentPlayer { get; set; }
 
-        public virtual Player Player2 { get; set; }
+        //public int PlayerMatchId { get; set; }
+
+        //public virtual PlayerMatch PlayerMatch { get; set; }
 
         public bool PendingFight { get; set; }
 
-        public int Player1WinCount { get; set; }
-        public int Player2WinCount { get; set; }
+        public int WinCount { get; set; }
 
         public DateTime LastMatch { get; set; }
 
-        public int Matches { get; set; }
+        //Could be a tourney or in general.
+        public string Topic { get; set; }
     }
+
+    public class Guild {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        [JsonIgnore]
+        public ICollection<GuildPlayer> GuildPlayers { get; set; }
+    }
+
+    public class GuildPlayer {
+        public int PlayerId { get; set; }
+        public int GuildId { get; set; }
+
+        public Player Player { get; set; }
+        public Guild Guild { get; set; }
+    }
+    /* 
+        public class PlayerMatch {
+            public int PlayerId { get; set; }
+            public int MatchId { get; set; }
+
+            public Player Player { get; set; }
+            public Match Match { get; set; }
+        }
+        */
 }

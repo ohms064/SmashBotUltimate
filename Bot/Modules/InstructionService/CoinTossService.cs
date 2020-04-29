@@ -5,7 +5,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using SmashBotUltimate.Bot.Extensions;
 namespace SmashBotUltimate.Bot.Modules.InstructionService {
-    public class CoinTossService : IInteractionService<CoinTossResult> {
+    public class CoinTossService : IInteractionService<CoinTossResult, string> {
 
         public IRandomUtilitiesService RandomService { get; set; }
         public const string Head = "heads";
@@ -22,6 +22,16 @@ namespace SmashBotUltimate.Bot.Modules.InstructionService {
             }
         }
 
+        public async Task<string> SimpleAction (CommandContext context) {
+            return await CoinToss (context);
+        }
+
+        private async Task<string> CoinToss (CommandContext context) {
+            var coinResult = RandomService.PickOne (Head, Tails);
+            await context.ReplyAsync ($"Tirando... Salió {coinResult}.");
+            return coinResult;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -30,10 +40,10 @@ namespace SmashBotUltimate.Bot.Modules.InstructionService {
         /// <param name="args">Heads or Tails</param>
         /// <returns></returns>
         public async Task<CoinTossResult> BeginInteraction (CommandContext context, DiscordMember calling) {
-            return await CoinTossAttempt (context, calling, context.Client.GetInteractivity (), 0);
+            return await CoinTossInteraction (context, calling, context.Client.GetInteractivity (), 0);
         }
 
-        private async Task<CoinTossResult> CoinTossAttempt (CommandContext context, DiscordMember calling, InteractivityExtension interactivity, int attempt) {
+        private async Task<CoinTossResult> CoinTossInteraction (CommandContext context, DiscordMember calling, InteractivityExtension interactivity, int attempt) {
             if (attempt == _maxAttempts) {
                 await context.ReplyAsync ($"¡{calling.Mention} alcanzaste el máximo número de intentos!");
                 return null;
@@ -48,15 +58,13 @@ namespace SmashBotUltimate.Bot.Modules.InstructionService {
                 return null;
             }
 
-            var coinResult = RandomService.PickOne (Head, Tails);
-
             //TODO: Validate and extract the answer with regex instead of just checking it.
             if (UserInputError (resultMessage.Result.Content)) {
                 //await context.ReplyAsync ($"{calling.Mention} no elegiste bien!");
-                return await CoinTossAttempt (context, calling, interactivity, attempt + 1);
+                return await CoinTossInteraction (context, calling, interactivity, attempt + 1);
             }
 
-            await context.ReplyAsync ($"Tirando... Salió {coinResult}.");
+            var coinResult = await CoinToss (context);
 
             var startingWon = resultMessage.Result.Content.StartsWith (coinResult[0]); //solo comparamos la primera letra, por si hay un typo.
             return new CoinTossResult (startingWon);

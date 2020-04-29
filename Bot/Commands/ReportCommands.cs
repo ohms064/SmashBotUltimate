@@ -18,7 +18,7 @@ namespace SmashBotUltimate.Bot.Commands {
 
         public IGuildService GuildService { get; set; }
 
-        public IInteractionService<CoinTossResult> CoinTossService { get; set; }
+        public IInteractionService<CoinTossResult, string> CoinTossService { get; set; }
 
         private const string Head = "heads",
             Tails = "tails";
@@ -30,9 +30,15 @@ namespace SmashBotUltimate.Bot.Commands {
         }
 
         [Command ("batalla")]
+        [Aliases ("pelea", "inicia")]
+        [Description ("Inicia el procesos de pelea contra un oponente")]
 
         public async Task BeginBattle (CommandContext context, [Description ("El usuario al que retarás")] DiscordMember adversary, [RemainingText] string text) {
             var callingMember = context.Member;
+
+            if (callingMember == adversary) {
+                return;
+            }
 
             var startingMember = RandomService.PickOne (callingMember, adversary);
             var otherMember = startingMember == callingMember ? adversary : callingMember;
@@ -58,8 +64,7 @@ namespace SmashBotUltimate.Bot.Commands {
         [Description ("Reporta una victoria sobre un jugador.")]
         public async Task Victoria (CommandContext context, [Description ("El usuario al que le ganaste")] DiscordMember targetUser = null, [RemainingText] string resultStr = null) {
             var callingUser = context.Member;
-            if (callingUser == null) {
-                await context.ReplyAsync ("WTF, quién me escribió");
+            if (callingUser == targetUser) {
                 return;
             }
 

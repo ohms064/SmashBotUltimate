@@ -36,7 +36,7 @@ namespace SmashBotUltimate.Bot {
             });
 
             var commandsConfig = new CommandsNextConfiguration {
-                StringPrefixes = new string[] { "!" },
+                StringPrefixes = new string[] { "!", "!!" },
                 EnableDms = false,
                 EnableMentionPrefix = true,
                 Services = services
@@ -46,6 +46,7 @@ namespace SmashBotUltimate.Bot {
 
             commands.RegisterCommands<ReportCommands> ();
             commands.RegisterCommands<InfoCommands> ();
+            commands.RegisterCommands<UtilsCommands> ();
 
             Client.ConnectAsync ();
         }

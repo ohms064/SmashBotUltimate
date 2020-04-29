@@ -30,7 +30,7 @@ namespace SmashBotUltimate {
             services.AddSingleton<IGuildService, GuildService> ();
             services.AddSingleton<IChannelRedirectionService, ChannelRedirectionService> ();
             services.AddSingleton<IRandomUtilitiesService, RandomUtilitiesService> ();
-            services.AddSingleton<IInteractionService<CoinTossResult>, CoinTossService> (
+            services.AddSingleton<IInteractionService<CoinTossResult, string>, CoinTossService> (
                 (serviceProvider) => {
                     return new CoinTossService (5, serviceProvider.GetService<IRandomUtilitiesService> ());
                 }
