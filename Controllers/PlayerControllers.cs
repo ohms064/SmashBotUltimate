@@ -26,7 +26,7 @@ namespace SmashBotUltimate.Controllers {
 
         [HttpGet ()]
         public IActionResult GetPlayers () {
-            Player[] result = GetAllPlayers (Context);
+            Player[] result = GetAllPlayers (Context, true, true, true, true);
 
             if (result == null) {
                 return NotFound ();
@@ -38,7 +38,7 @@ namespace SmashBotUltimate.Controllers {
         [HttpGet ("{id}")]
         public IActionResult GetPlayer (int id) {
 
-            Player result = GetPlayerWithId (id, Context);
+            Player result = GetPlayerWithId (id, Context, true, true, true, true);
 
             if (result == null) {
                 return NotFound ();
@@ -51,7 +51,7 @@ namespace SmashBotUltimate.Controllers {
         [HttpGet ("{name}")]
         public IActionResult GetPlayerByName (string name) {
 
-            Player result = GetPlayerWithName (name, Context);
+            Player result = GetPlayerWithName (name, Context, true, true, true, true);
             if (result == null) {
                 return NotFound ();
             }
@@ -120,35 +120,52 @@ namespace SmashBotUltimate.Controllers {
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public static Player[] GetAllPlayers (PlayerContext context) {
+        public static Player[] GetAllPlayers (PlayerContext context,
+            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool readOnly = true) {
+
             Player[] result = null;
 
-            result = (from p in context.Players.AsNoTracking () select p).ToArray ();
+            var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, readOnly);
+
+            result = (from p in query select p).ToArray ();
 
             return result;
         }
-        public static Player GetPlayerWithId (int id, PlayerContext context) {
+        public static Player GetPlayerWithId (int id, PlayerContext context,
+            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool readOnly = true) {
             Player result = null;
 
-            result = (from p in context.Players where p.PlayerId == id select p).FirstOrDefault ();
+            var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, readOnly);
+
+            result = (from p in query where p.PlayerId == id select p).FirstOrDefault ();
 
             return result;
         }
 
-        public static Player GetPlayerWithName (string name, PlayerContext context) {
+        public static Player GetPlayerWithName (string name, PlayerContext context,
+            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool readOnly = true) {
+
             Player result = null;
-            result = (from p in context.Players where p.Name == name select p).FirstOrDefault ();
+            var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, readOnly);
+
+            result = (from p in query where p.Name == name select p).FirstOrDefault ();
             return result;
         }
 
-        /// <summary>
-        /// Finds a match with a player. If no match is found and create is true, one is created.
-        /// </summary>
-        /// <param name="winner"></param>
-        /// <param name="opposing"></param>
-        /// <param name="context"></param>
-        /// <param name="topic"></param>
-        /// <returns></returns>
+        private static IQueryable<Player> CreatePlayerEntities (PlayerContext context, bool includeMatches,
+            bool includeOpponentMatches, bool includeNicknames, bool readOnly) {
+            var query = readOnly ? context.Players.AsNoTracking () : context.Players;
+            if (includeMatches) {
+                query = query.Include (p => p.PlayerMatches);
+            }
+            if (includeOpponentMatches) {
+                query = query.Include (p => p.OpponentMatches);
+            }
+            if (includeNicknames) {
+                query = query.Include (p => p.Nicknames);
+            }
+            return query;
+        }
         #endregion
     }
 }
