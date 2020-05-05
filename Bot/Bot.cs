@@ -23,7 +23,7 @@ namespace SmashBotUltimate.Bot {
                 Token = token,
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
-                LogLevel = LogLevel.Debug,
+                LogLevel = LogLevel.Info,
                 UseInternalLogHandler = true,
             };
 
@@ -47,7 +47,7 @@ namespace SmashBotUltimate.Bot {
             commands.RegisterCommands<ReportCommands> ();
             commands.RegisterCommands<InfoCommands> ();
             commands.RegisterCommands<UtilsCommands> ();
-
+            commands.RegisterCommands<SmashfestCommands> ();
             Client.ConnectAsync ();
         }
 
