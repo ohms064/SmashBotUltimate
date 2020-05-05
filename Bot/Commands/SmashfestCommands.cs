@@ -35,6 +35,10 @@ namespace SmashBotUltimate.Bot.Commands {
                 return;
             }
 
+            if (teamA.Equals (teamB)) {
+                await context.RespondWithFileAsync ("Los equipos tienen el mismo nombre!");
+            }
+
             await context.ReplyAsync ("Creating roles");
             var smashfestRole = await context.Guild.CreateRoleAsync (Smashfest, Permissions.None);
 
@@ -54,7 +58,7 @@ namespace SmashBotUltimate.Bot.Commands {
             var teamBMaster = await context.Guild.CreateRoleAsync ($"{teamB}-{Master}", Permissions.None);
 
             await context.RespondAsync ("Creating channels");
-            //TODO: Permissions doesn't seem to be working
+
             var teamAPermissions = CreatePermissions (context.Guild, teamARole, teamBRole);
             var teamBPermissions = CreatePermissions (context.Guild, teamBRole, teamARole);
             var categoryPermissions = CreatePermissions (context.Guild, smashfestRole, context.Guild.EveryoneRole);
@@ -129,7 +133,7 @@ namespace SmashBotUltimate.Bot.Commands {
         }
 
         private bool ChannelIsFromSmashfest (DiscordChannel channel) {
-            return channel.Name.StartsWith (Team) || channel.Name.StartsWith (Team);
+            return channel.Name.StartsWith (Team) || channel.Name.StartsWith (Smashfest);
         }
         private List<DiscordOverwriteBuilder> CreatePermissions (DiscordGuild guild, DiscordRole allowedRole, DiscordRole deniedRole) {
             var permissions = new List<DiscordOverwriteBuilder> ();
@@ -143,6 +147,7 @@ namespace SmashBotUltimate.Bot.Commands {
                 adminPermissions.Allow (Permissions.PrioritySpeaker);
                 permissions.Add (adminPermissions);
             }
+            Console.WriteLine ($"allowed: {allowedRole.Name}");
             DiscordOverwriteBuilder allowed = new DiscordOverwriteBuilder ();
             allowed.For (allowedRole);
             allowed.Allow (Permissions.SendMessages);
@@ -150,8 +155,9 @@ namespace SmashBotUltimate.Bot.Commands {
             allowed.Allow (Permissions.ReadMessageHistory);
             permissions.Add (allowed);
 
+            Console.WriteLine ($"denied: {deniedRole.Name}");
             DiscordOverwriteBuilder denied = new DiscordOverwriteBuilder ();
-            denied.For (allowedRole);
+            denied.For (deniedRole);
             denied.Deny (Permissions.SendMessages);
             denied.Deny (Permissions.AccessChannels);
             denied.Deny (Permissions.ReadMessageHistory);
@@ -164,6 +170,5 @@ namespace SmashBotUltimate.Bot.Commands {
             var channels = from c in context.Guild.Channels where ChannelIsFromSmashfest (c.Value) select c.Value;
             return channels.Count () > 0;
         }
-
     }
 }
