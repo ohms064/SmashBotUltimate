@@ -20,7 +20,7 @@ namespace SmashBotUltimate.Controllers {
         }
 
         [HttpGet ("user")]
-        public IActionResult GetPlayersMatches (int id1, int id2, string topic) {
+        public IActionResult GetPlayersMatches (ulong id1, ulong id2, string topic) {
 
             if (id1 == id2) {
                 return BadRequest ("Ids can't be the same");
@@ -65,8 +65,8 @@ namespace SmashBotUltimate.Controllers {
         [Route ("setmatch")]
         [HttpPost]
         public IActionResult SetPlayersMatch ([FromBody] TwoIds json) {
-            int firstId = json.WinnerId;
-            int secondId = json.LoserId;
+            ulong firstId = json.WinnerId;
+            ulong secondId = json.LoserId;
             string topic = json.Topic ?? Match.DefaultTopic;
             var firstPlayer = PlayerController.GetPlayerWithId (firstId, context, includeMatches : true, readOnly : false);
             if (firstPlayer == null) {
@@ -92,8 +92,8 @@ namespace SmashBotUltimate.Controllers {
         [Route ("completematch")]
         [HttpPost]
         public IActionResult CompletePlayersMatch ([FromBody] TwoIds json) {
-            int id1 = json.WinnerId;
-            int id2 = json.LoserId;
+            ulong id1 = json.WinnerId;
+            ulong id2 = json.LoserId;
             string topic = json.Topic ?? Match.DefaultTopic;
             var winner = PlayerController.GetPlayerWithId (id1, context, includeMatches : true, readOnly : false);
             if (winner == null) {
@@ -104,8 +104,10 @@ namespace SmashBotUltimate.Controllers {
                 return BadRequest ();
             }
 
-            var winnerResult = MatchController.GetPlayerMatch (ref winner, ref loser, context, topic, false);
-            var loserResult = MatchController.GetPlayerMatch (ref loser, ref winner, context, topic, false);
+            var results = GetCompletePlayerMatch (context, ref winner, ref loser, topic);
+
+            var winnerResult = results[0];
+            var loserResult = results[1];
 
             if (winnerResult == null || loserResult == null) {
                 return BadRequest ("Match has not been set to start.");
@@ -114,12 +116,7 @@ namespace SmashBotUltimate.Controllers {
                 return BadRequest ("No match is pending");
             }
 
-            winnerResult.WinCount++;
-            winnerResult.PendingFight = false;
-            loserResult.PendingFight = false;
-            context.Update<Match> (winnerResult);
-            context.Update<Match> (loserResult);
-            context.SaveChanges ();
+            CompletePlayerMatch (context, ref winnerResult, ref loserResult);
             return Ok (winnerResult);
 
         }
@@ -157,8 +154,8 @@ namespace SmashBotUltimate.Controllers {
                 opposing.OpponentMatches = new List<Match> ();
             }
 
-            int playerId = local.PlayerId;
-            int opposingId = opposing.PlayerId;
+            ulong playerId = local.PlayerId;
+            ulong opposingId = opposing.PlayerId;
 
             result = (from p in local.PlayerMatches where p.OpponentPlayerId == opposingId && p.Topic.Equals (topic) select p).FirstOrDefault ();
             if (result == null && create) {
@@ -174,9 +171,31 @@ namespace SmashBotUltimate.Controllers {
                 context.Matches.Add (result);
                 context.Update<Player> (local);
                 context.Update<Player> (opposing);
-
+                context.SaveChanges ();
             }
             return result;
+        }
+
+        public static Match[] GetCompletePlayerMatch (PlayerContext context, ref Player first, ref Player second, string topic, bool create = false) {
+            return new Match[] {
+            GetPlayerMatch (ref first, ref second, context, topic, false),
+            GetPlayerMatch (ref second, ref first, context, topic, false),
+            };
+        }
+
+        public static void StartPlayerMatch (PlayerContext context, ref Match first, ref Match second) {
+            first.PendingFight = true;
+            second.PendingFight = true;
+            context.SaveChanges ();
+        }
+
+        public static void CompletePlayerMatch (PlayerContext context, ref Match winnerMatch, ref Match loserMatch) {
+            winnerMatch.WinCount++;
+            winnerMatch.PendingFight = false;
+            loserMatch.PendingFight = false;
+            context.Update<Match> (winnerMatch);
+            context.Update<Match> (loserMatch);
+            context.SaveChanges ();
         }
     }
 }

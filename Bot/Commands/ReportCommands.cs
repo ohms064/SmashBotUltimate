@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -7,12 +6,17 @@ using DSharpPlus.Interactivity;
 using SmashBotUltimate.Bot.Extensions;
 using SmashBotUltimate.Bot.Models;
 using SmashBotUltimate.Bot.Modules;
+using SmashBotUltimate.Bot.Modules.DBContextService;
 using SmashBotUltimate.Bot.Modules.InstructionService;
-
+using SmashBotUltimate.Models;
 namespace SmashBotUltimate.Bot.Commands {
     public class ReportCommands : BaseCommandModule {
+
+        public PlayerContext DBContext { get; set; }
         public IResultService ResultService { get; set; }
         public IChannelRedirectionService ChannelRedirection { get; set; }
+
+        public PlayerDBService DBConection { get; set; }
 
         public IRandomUtilitiesService RandomService { get; set; }
 
@@ -50,7 +54,7 @@ namespace SmashBotUltimate.Bot.Commands {
             var winner = startingWon.successGuess ? startingMember : otherMember;
             var loser = startingWon.successGuess ? otherMember : startingMember;
 
-            await context.ReplyAsync ($"{winner.DisplayName} has ganado! {winner.DisplayName} baneas un escenario, {loser.DisplayName} banea dos y {winner.DisplayName} escoge escenarios.");
+            await context.ReplyAsync ($"{winner.DisplayName} has ganado! {winner.DisplayName} baneas un escenario, {loser.DisplayName} banea dos y {winner.DisplayName} escoge escenario.");
 
         }
 
@@ -61,6 +65,7 @@ namespace SmashBotUltimate.Bot.Commands {
         /// <param name="resultStr">Result</param>
         /// <returns></returns>
         [Command ("gane")]
+        [Aliases ("derrote", "derroté", "vencí", "venci", "gané")]
         [Description ("Reporta una victoria sobre un jugador.")]
         public async Task Victoria (CommandContext context, [Description ("El usuario al que le ganaste")] DiscordMember targetUser = null, [RemainingText] string resultStr = null) {
             var callingUser = context.Member;
@@ -108,6 +113,21 @@ namespace SmashBotUltimate.Bot.Commands {
 
                 await GuildService.SendMessageToTextChannel (channel, generalMessage, admins);
                 await context.ReplyAsync ($"{generalMessage}");
+
+                var interaction = context.Client.GetInteractivity ();
+
+                await context.RespondAsync ($"{targetUser.Mention} confirma la victoria de {callingUser.DisplayName}. Sólo escribe sí o no.");
+
+                var response = await interaction.WaitForMessageAsync (context.WithPredicate ().ToUser (targetUser).InSameChannel ());
+
+                if (response.TimedOut || response.Result.Content.Contains ("no")) {
+                    return;
+                }
+
+                if (DBConection.SetMatch (context.Guild.Id, callingUser.Id, targetUser.Id)) {
+                    await context.RespondAsync ($"Se ha reportado la victoria de {callingUser.DisplayName}");
+                }
+
             } else {
                 await context.ReplyAsync ($"No se escribió bien el resultado: {resultStr}. Ejemplo: 2-1");
             }

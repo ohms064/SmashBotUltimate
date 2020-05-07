@@ -8,12 +8,15 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using Newtonsoft.Json;
 using SmashBotUltimate.Bot.Commands;
+using SmashBotUltimate.Models;
 
 namespace SmashBotUltimate.Bot {
     public class SmashBot {
         public DiscordClient Client { get; private set; }
 
         public CommandsNextExtension Commands { get; private set; }
+
+        public PlayerContext DBContext { get; private set; }
 
         public SmashBot (IServiceProvider services) {
             string token = Environment.GetEnvironmentVariable ("smashbot_token", EnvironmentVariableTarget.Machine) ??

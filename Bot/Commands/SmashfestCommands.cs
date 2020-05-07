@@ -12,11 +12,13 @@ using SmashBotUltimate.Bot.Extensions;
 using SmashBotUltimate.Bot.Models;
 using SmashBotUltimate.Bot.Modules;
 using SmashBotUltimate.Bot.Modules.InstructionService;
+using SmashBotUltimate.Models;
 
 namespace SmashBotUltimate.Bot.Commands {
 
     [Group ("smashfest")]
     public class SmashfestCommands : BaseCommandModule {
+        public PlayerContext DBContext { get; set; }
         public const string Fiend = "fiend";
         public const string Defender = "defender";
         public const string Champion = "champion";

@@ -1,14 +1,15 @@
-using DSharpPlus.CommandsNext;
-using DiscordMessageReplyFunction = System.Func<DSharpPlus.Entities.DiscordMessage, bool>;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 
 namespace SmashBotUltimate.Bot.Extensions {
+
+    public delegate bool DiscordMessageReplyFunction (DiscordMessage e);
     public static class CommandInteractivityExtensions {
-        public static DiscordMessageReplyFunction SameChannelResponse (this CommandContext context, DiscordMessageReplyFunction predicate) {
-            return (reactionArgs) => {
-                return reactionArgs.Channel == context.Channel && predicate.Invoke (reactionArgs);
-            };
+
+        public static DiscordInteractivityPredicateBuilder WithPredicate (this CommandContext context) {
+            return new DiscordInteractivityPredicateBuilder (context);
         }
 
         /// <summary>
@@ -21,4 +22,5 @@ namespace SmashBotUltimate.Bot.Extensions {
             return await context.Channel.SendMessageAsync (message);
         }
     }
+
 }

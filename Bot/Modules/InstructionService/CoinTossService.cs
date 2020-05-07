@@ -51,7 +51,7 @@ namespace SmashBotUltimate.Bot.Modules.InstructionService {
             var message = $"{calling.Mention} escribe Heads o Tails";
             await context.ReplyAsync (message);
 
-            var resultMessage = await interactivity.WaitForMessageAsync (context.SameChannelResponse ((x) => x.Author == calling));
+            var resultMessage = await interactivity.WaitForMessageAsync (context.WithPredicate ().InSameChannel ().SameUser ());
 
             if (resultMessage.TimedOut) {
                 await context.ReplyAsync ($"¡No hubo respuesta de {calling.Mention}! Vuelve a intenarlo.");

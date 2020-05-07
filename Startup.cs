@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using SmashBotUltimate.Bot;
 using SmashBotUltimate.Bot.Modules;
+using SmashBotUltimate.Bot.Modules.DBContextService;
 using SmashBotUltimate.Bot.Modules.InstructionService;
 using SmashBotUltimate.Models;
 namespace SmashBotUltimate {
@@ -35,6 +28,11 @@ namespace SmashBotUltimate {
             services.AddSingleton<IInteractionService<CoinTossResult, string>, CoinTossService> (
                 (serviceProvider) => {
                     return new CoinTossService (5, serviceProvider.GetService<IRandomUtilitiesService> ());
+                }
+            );
+            services.AddSingleton<PlayerDBService> (
+                (serviceProvider) => {
+                    return new PlayerDBService (serviceProvider.GetService<PlayerContext> ());
                 }
             );
 

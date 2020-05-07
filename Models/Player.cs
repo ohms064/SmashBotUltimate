@@ -79,7 +79,7 @@ namespace SmashBotUltimate.Models {
 
     public class Player {
 
-        public int PlayerId { get; set; }
+        public ulong PlayerId { get; set; }
         //Unique, should be Discord username#discriminator
         public string Name { get; set; }
 
@@ -92,7 +92,7 @@ namespace SmashBotUltimate.Models {
 
         public virtual ICollection<GuildPlayer> GuildPlayers { get; set; }
 
-        public bool HasGuildId (int id) {
+        public bool HasGuildId (ulong id) {
             foreach (var g in GuildPlayers) {
                 if (g.GuildId == id)
                     return true;
@@ -119,7 +119,7 @@ namespace SmashBotUltimate.Models {
         public const string DefaultTopic = "general";
         public int Id { get; set; }
 
-        public int OpponentPlayerId { get; set; }
+        public ulong OpponentPlayerId { get; set; }
 
         [JsonIgnore]
         public Player OpponentPlayer { get; set; }
@@ -139,17 +139,18 @@ namespace SmashBotUltimate.Models {
     }
 
     public class Guild {
-        public int Id { get; set; }
+        public ulong Id { get; set; }
 
         public string Name { get; set; }
 
         [JsonIgnore]
         public ICollection<GuildPlayer> GuildPlayers { get; set; }
+        public string CurrentMatches { get; set; }
     }
 
     public class GuildPlayer {
-        public int PlayerId { get; set; }
-        public int GuildId { get; set; }
+        public ulong PlayerId { get; set; }
+        public ulong GuildId { get; set; }
 
         public Player Player { get; set; }
         public Guild Guild { get; set; }

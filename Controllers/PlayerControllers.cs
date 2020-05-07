@@ -36,7 +36,7 @@ namespace SmashBotUltimate.Controllers {
         }
 
         [HttpGet ("{id}")]
-        public IActionResult GetPlayer (int id) {
+        public IActionResult GetPlayer (ulong id) {
 
             Player result = GetPlayerWithId (id, Context, true, true, true, true);
 
@@ -114,6 +114,10 @@ namespace SmashBotUltimate.Controllers {
         #endregion
 
         #region Aux Functions
+        public static void AddPlayer (PlayerContext context, Player player) {
+            context.Add<Player> (player);
+            context.SaveChanges ();
+        }
 
         /// <summary>
         /// Returns an array of all Players saved in the database.
@@ -121,21 +125,21 @@ namespace SmashBotUltimate.Controllers {
         /// <param name="context"></param>
         /// <returns></returns>
         public static Player[] GetAllPlayers (PlayerContext context,
-            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool readOnly = true) {
+            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool includeGuildPlayer = false, bool readOnly = true) {
 
             Player[] result = null;
 
-            var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, readOnly);
+            var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, includeGuildPlayer, readOnly);
 
             result = (from p in query select p).ToArray ();
 
             return result;
         }
-        public static Player GetPlayerWithId (int id, PlayerContext context,
-            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool readOnly = true) {
+        public static Player GetPlayerWithId (ulong id, PlayerContext context,
+            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool includeGuildPlayer = false, bool readOnly = true) {
             Player result = null;
 
-            var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, readOnly);
+            var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, includeGuildPlayer, readOnly);
 
             result = (from p in query where p.PlayerId == id select p).FirstOrDefault ();
 
@@ -143,17 +147,17 @@ namespace SmashBotUltimate.Controllers {
         }
 
         public static Player GetPlayerWithName (string name, PlayerContext context,
-            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool readOnly = true) {
+            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool includeGuildPlayer = false, bool readOnly = true) {
 
             Player result = null;
-            var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, readOnly);
+            var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, includeGuildPlayer, readOnly);
 
             result = (from p in query where p.Name == name select p).FirstOrDefault ();
             return result;
         }
 
         private static IQueryable<Player> CreatePlayerEntities (PlayerContext context, bool includeMatches,
-            bool includeOpponentMatches, bool includeNicknames, bool readOnly) {
+            bool includeOpponentMatches, bool includeNicknames, bool includeGuildPlayer, bool readOnly) {
             var query = readOnly ? context.Players.AsNoTracking () : context.Players;
             if (includeMatches) {
                 query = query.Include (p => p.PlayerMatches);
@@ -163,6 +167,9 @@ namespace SmashBotUltimate.Controllers {
             }
             if (includeNicknames) {
                 query = query.Include (p => p.Nicknames);
+            }
+            if (includeGuildPlayer) {
+                query = query.Include (p => p.GuildPlayers);
             }
             return query;
         }
