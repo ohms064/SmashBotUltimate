@@ -1,12 +1,11 @@
+#define CONFIG_FILE
 using System;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
-using Newtonsoft.Json;
 using SmashBotUltimate.Bot.Commands;
 using SmashBotUltimate.Models;
 
@@ -19,8 +18,27 @@ namespace SmashBotUltimate.Bot {
         public PlayerContext DBContext { get; private set; }
 
         public SmashBot (IServiceProvider services) {
-            string token = Environment.GetEnvironmentVariable ("smashbot_token", EnvironmentVariableTarget.Machine) ??
+            const string path = "config.json";
+            string token = "";
+#if CONFIG_FILE
+            if (!File.Exists (path)) {
+                new BotConfig ().Save (path);
+
+                return;
+            }
+            else {
+                token = BotConfig.FromFile (path).Token;
+            }
+#else
+            token = Environment.GetEnvironmentVariable ("smashbot_token", EnvironmentVariableTarget.Machine);
+            if (string.IsNullOrEmpty (token)) {
                 Environment.GetEnvironmentVariable ("smashbot_token", EnvironmentVariableTarget.User);
+                if (string.IsNullOrEmpty (token)) {
+                    Console.WriteLine ("El token smashbot_token debe estar registrado en las variables de entorno! El bot no se inició");
+                    return;
+                }
+            }
+#endif
 
             var config = new DiscordConfiguration {
                 Token = token,

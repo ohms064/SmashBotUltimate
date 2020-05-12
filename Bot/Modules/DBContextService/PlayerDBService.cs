@@ -95,5 +95,9 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
             return true;
 
         }
+
+        public void AddGuild(ulong guildId, string guildName){
+            GuildController.AddGuild(_context, guildId, guildName);
+        }
     }
 }

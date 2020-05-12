@@ -5046,27 +5046,29 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\otoko\\.nuget\\packages\\": {}
+    "/Users/ohms/.nuget/packages/": {},
+    "/usr/local/share/dotnet/sdk/NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Documentos\\Trabajo\\Gaymers\\SmashBotUltimate\\SmashBotUltimate.csproj",
+      "projectUniqueName": "/Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/SmashBotUltimate.csproj",
       "projectName": "SmashBotUltimate",
-      "projectPath": "D:\\Documentos\\Trabajo\\Gaymers\\SmashBotUltimate\\SmashBotUltimate.csproj",
-      "packagesPath": "C:\\Users\\otoko\\.nuget\\packages\\",
-      "outputPath": "D:\\Documentos\\Trabajo\\Gaymers\\SmashBotUltimate\\obj\\",
+      "projectPath": "/Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/SmashBotUltimate.csproj",
+      "packagesPath": "/Users/ohms/.nuget/packages/",
+      "outputPath": "/Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/obj/",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
+      ],
       "configFilePaths": [
-        "D:\\Documentos\\Trabajo\\Gaymers\\SmashBotUltimate\\NuGet.Config",
-        "C:\\Users\\otoko\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "/Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/NuGet.Config",
+        "/Users/ohms/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp3.1"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {},
         "https://nuget.emzi0767.com/api/v3/index.json": {}
       },
@@ -5133,7 +5135,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.200\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/3.1.201/RuntimeIdentifierGraph.json"
       }
     }
   }

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -88,32 +89,40 @@ namespace SmashBotUltimate.Bot.Commands {
                 return;
             }
 
-            if (ResultService.GetResult (callingUser, targetUser, resultStr, out Result result)) {
-                var generalMessage = $"Resultado: \n\t{result.winner}\t{result.loser}. {result.message}";
-                await targetUser.SendMessageAsync ($"El usuario {callingUser.Mention} reportó una victoria {result.winner.score}-{result.loser.score} contra ti.");
+            var messageValid = ResultService.GetResult (callingUser, targetUser, resultStr, out Result result);
 
-                var channelName = ChannelRedirection.GetRedirectedChannel (context.Channel.Name);
+            if (!messageValid) {
+                await context.ReplyAsync ($"No se escribió bien el resultado: {resultStr}. Ejemplo: 2-1");
+                return;
+            }
 
-                var channel = GuildService.FindTextChannel (context, channelName);
-                var admins = GuildService.FindRole (context, "admin");
+            var generalMessage = $"Resultado: \n\t{result.winner}\t{result.loser}. {result.message}";
+            await targetUser.SendMessageAsync ($"El usuario {callingUser.Mention} reportó una victoria {result.winner.score}-{result.loser.score} contra ti.");
+
+            var channelName = ChannelRedirection.GetRedirectedChannel (context.Channel.Name);
+
+            var channel = GuildService.FindTextChannel (context, channelName);
+            var admins = GuildService.FindRole (context, "admin");
+
+            if (channel == null) {
+                var roles = callingUser.Roles;
+                var roleText = GuildService.GetEntityNames (roles);
+                generalMessage = $"{generalMessage}\nCanal: {context.Channel.Name} Roles: {roleText}";
+
+                channelName = ChannelRedirection.TargetChannelName;
+                channel = GuildService.FindTextChannel (context, channelName);
 
                 if (channel == null) {
-                    var roles = callingUser.Roles;
-                    var roleText = GuildService.GetEntityNames (roles);
-                    generalMessage = $"{generalMessage}\nCanal: {context.Channel.Name} Roles: {roleText}";
-
-                    channelName = ChannelRedirection.TargetChannelName;
-                    channel = GuildService.FindTextChannel (context, channelName);
-
-                    if (channel == null) {
-                        await context.ReplyAsync ($"{generalMessage}");
-                        return;
-                    }
+                    await context.ReplyAsync ($"{generalMessage}");
+                    return;
                 }
+            }
 
-                await GuildService.SendMessageToTextChannel (channel, generalMessage, admins);
-                await context.ReplyAsync ($"{generalMessage}");
+            await GuildService.SendMessageToTextChannel (channel, generalMessage, admins);
+            await context.ReplyAsync ($"{generalMessage}");
 
+            var hasAdmin = callingUser.Roles.Where (role => role.Name.Contains ("admin")).Count () > 0;
+            if (!hasAdmin) {
                 var interaction = context.Client.GetInteractivity ();
 
                 await context.RespondAsync ($"{targetUser.Mention} confirma la victoria de {callingUser.DisplayName}. Sólo escribe sí o no.");
@@ -121,15 +130,17 @@ namespace SmashBotUltimate.Bot.Commands {
                 var response = await interaction.WaitForMessageAsync (context.WithPredicate ().ToUser (targetUser).InSameChannel ());
 
                 if (response.TimedOut || response.Result.Content.Contains ("no")) {
+                    await context.RespondAsync (
+                        $"{callingUser.Mention} no se ha aceptado tu victoria. Revisa si hay  un problema o contacta a un administrador.");
                     return;
                 }
+            }
 
-                if (DBConection.SetMatch (context.Guild.Id, callingUser.Id, targetUser.Id)) {
-                    await context.RespondAsync ($"Se ha reportado la victoria de {callingUser.DisplayName}");
-                }
-
-            } else {
-                await context.ReplyAsync ($"No se escribió bien el resultado: {resultStr}. Ejemplo: 2-1");
+            if (DBConection.SetMatch (context.Guild.Id, callingUser.Id, targetUser.Id)) {
+                await context.RespondAsync ($"Se ha reportado la victoria de {callingUser.DisplayName}");
+            }
+            else {
+                await context.RespondAsync ($"Ha habido un problema con tu registro!");
             }
 
         }

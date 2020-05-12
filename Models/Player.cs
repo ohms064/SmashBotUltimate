@@ -109,7 +109,7 @@ namespace SmashBotUltimate.Models {
 
         public int PlatformId { get; set; }
 
-        public int PlayerId { get; set; }
+        public ulong PlayerId { get; set; }
 
         [JsonIgnore]
         public virtual Player OriginPlayer { get; set; }
