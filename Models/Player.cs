@@ -134,6 +134,8 @@ namespace SmashBotUltimate.Models {
 
         public DateTime LastMatch { get; set; }
 
+        public TimeSpan Interval { get; set; }
+
         //Could be a tourney or in general.
         public string Topic { get; set; }
     }
@@ -143,7 +145,6 @@ namespace SmashBotUltimate.Models {
 
         public string Name { get; set; }
 
-        [JsonIgnore]
         public ICollection<GuildPlayer> GuildPlayers { get; set; }
         public string CurrentMatches { get; set; }
     }
@@ -152,7 +153,10 @@ namespace SmashBotUltimate.Models {
         public ulong PlayerId { get; set; }
         public ulong GuildId { get; set; }
 
+        [JsonIgnore]
         public Player Player { get; set; }
+
+        [JsonIgnore]
         public Guild Guild { get; set; }
     }
     /* 

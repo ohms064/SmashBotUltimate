@@ -1,13 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using SmashBotUltimate.Models;
 namespace SmashBotUltimate.Controllers {
     [Route ("[controller]")]
@@ -163,6 +157,7 @@ namespace SmashBotUltimate.Controllers {
                 result = new Match {
                 OpponentPlayerId = opposingId,
                 OpponentPlayer = opposing,
+                PendingFight = true,
                 Topic = topic ?? "general"
                 };
 
