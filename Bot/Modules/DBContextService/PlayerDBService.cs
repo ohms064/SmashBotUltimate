@@ -1,7 +1,4 @@
-using System.Linq;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
+using System.Collections.Generic;
 using DSharpPlus.Entities;
 using SmashBotUltimate.Controllers;
 using SmashBotUltimate.Models;
@@ -17,35 +14,39 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
             return PlayerController.GetPlayerWithId (id, _context);
         }
 
-        public bool CreatePlayer (DiscordMember member) {
+        public Player GetPlayer (DiscordMember member) {
+            var player = PlayerController.GetPlayerWithId (member.Id, _context, includeGuildPlayer : true);
+            if (player == null) {
+                return CreatePlayer (member);
+            }
+            else if (!player.HasGuildId (member.Guild.Id)) {
+                var guild = GuildController.GetGuildWithId (_context, member.Guild.Id);
+                PlayerController.AddGuild (_context, player, guild);
+            }
+            return player;
+        }
+
+        public Player CreatePlayer (DiscordMember member) {
             var guild = GuildController.GetGuildWithId (_context, member.Guild.Id);
-            if (guild == null) {
-                return false;
-            }
 
-            var userInDb = PlayerController.GetPlayerWithId (member.Id, _context, includeGuildPlayer : true);
-            if (userInDb != null) {
-                var hasGuild = userInDb.HasGuildId (member.Guild.Id);
-                if (hasGuild) {
-                    return false; //Player already created and in guild
-                }
-
-                GuildController.AddGuildToPlayer (_context, ref guild, ref userInDb);
-                return true;
-            }
             //No user in database
             Player player = new Player {
                 Name = member.DisplayName,
                 PlayerId = member.Id,
-                Nivel = 0
+                Nivel = 0,
+
+            };
+            player.GuildPlayers = new List<GuildPlayer> () {
+                new GuildPlayer { Guild = guild, GuildId = member.Guild.Id, Player = player, PlayerId = player.PlayerId }
             };
 
             PlayerController.AddPlayer (_context, player);
 
-            return true;
+            return player;
+
         }
 
-        public bool StartMatch (ulong guildId, ulong firstPlayerId, ulong secondPlayerId) {
+        public bool StartMatch (ulong guildId, DiscordMember firstPlayerId, DiscordMember secondPlayerId) {
             var currentEvent = GuildController.GetGuildEvent (_context, guildId);
             if (string.IsNullOrEmpty (currentEvent)) {
                 return false;
@@ -53,12 +54,8 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
 
             currentEvent = $"{guildId}_{currentEvent}";
 
-            var first = PlayerController.GetPlayerWithId (firstPlayerId, _context, includeMatches : true);
-            var second = PlayerController.GetPlayerWithId (secondPlayerId, _context, includeMatches : true);
-
-            if (first == null || second == null) {
-                return false;
-            }
+            var first = GetPlayer (firstPlayerId);
+            var second = GetPlayer (secondPlayerId);
 
             var match = MatchController.GetCompletePlayerMatch (_context, ref first, ref second, currentEvent, true);
 
@@ -66,7 +63,7 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
             return true;
         }
 
-        public bool SetMatch (ulong guildId, ulong winnerId, ulong loserId) {
+        public bool SetMatch (ulong guildId, DiscordMember winnerMember, DiscordMember loserMember) {
             var currentEvent = GuildController.GetGuildEvent (_context, guildId);
             if (string.IsNullOrEmpty (currentEvent)) {
                 return false;
@@ -74,8 +71,8 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
 
             currentEvent = $"{guildId}_{currentEvent}";
 
-            var winner = PlayerController.GetPlayerWithId (winnerId, _context);
-            var loser = PlayerController.GetPlayerWithId (loserId, _context);
+            var winner = GetPlayer (winnerMember);
+            var loser = GetPlayer (loserMember);
 
             if (winner == null || loser == null) {
                 return false;
@@ -96,8 +93,9 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
 
         }
 
-        public void AddGuild(ulong guildId, string guildName){
-            GuildController.AddGuild(_context, guildId, guildName);
+        public void AddGuild (ulong guildId, string guildName) {
+            var guild = GuildController.GetGuildWithId (_context, guildId);
+            if (guild == null) GuildController.AddGuild (_context, guildId, guildName);
         }
     }
 }

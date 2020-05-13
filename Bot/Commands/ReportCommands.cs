@@ -136,7 +136,7 @@ namespace SmashBotUltimate.Bot.Commands {
                 }
             }
 
-            if (DBConection.SetMatch (context.Guild.Id, callingUser.Id, targetUser.Id)) {
+            if (DBConection.SetMatch (context.Guild.Id, callingUser, targetUser)) {
                 await context.RespondAsync ($"Se ha reportado la victoria de {callingUser.DisplayName}");
             }
             else {

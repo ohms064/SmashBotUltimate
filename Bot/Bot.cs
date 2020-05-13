@@ -7,17 +7,21 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using SmashBotUltimate.Bot.Commands;
+using SmashBotUltimate.Bot.Modules.DBContextService;
 using SmashBotUltimate.Models;
 
 namespace SmashBotUltimate.Bot {
     public class SmashBot {
-        public DiscordClient Client { get; private set; }
+        public DiscordClient Client { get; set; }
 
-        public CommandsNextExtension Commands { get; private set; }
+        public CommandsNextExtension Commands { get; set; }
 
-        public PlayerContext DBContext { get; private set; }
+        public PlayerContext DBContext { get; set; }
+
+        public PlayerDBService DBService { get; set; }
 
         public SmashBot (IServiceProvider services) {
+            DBService = (PlayerDBService) services.GetService (typeof (PlayerDBService));
             const string path = "config.json";
             string token = "";
 #if CONFIG_FILE
@@ -51,6 +55,8 @@ namespace SmashBotUltimate.Bot {
             Client = new DiscordClient (config);
 
             Client.Ready += OnClientReady;
+            Client.GuildCreated += OnGuildEntered;
+            Client.GuildDeleted += OnGuildLeave;
 
             Client.UseInteractivity (new InteractivityConfiguration {
                 Timeout = TimeSpan.FromSeconds (20)
@@ -73,6 +79,17 @@ namespace SmashBotUltimate.Bot {
         }
 
         private Task OnClientReady (ReadyEventArgs e) {
+            return Task.CompletedTask;
+        }
+
+        private Task OnGuildEntered (GuildCreateEventArgs args) {
+            DBService.AddGuild (args.Guild.Id, args.Guild.Name);
+            Console.WriteLine ($"SmashBot says hi to guild {args.Guild.Name}!");
+            return Task.CompletedTask;
+        }
+
+        private Task OnGuildLeave (GuildDeleteEventArgs args) {
+            Console.WriteLine ($"Smashbot says bye bye to {args.Guild.Name}");
             return Task.CompletedTask;
         }
     }

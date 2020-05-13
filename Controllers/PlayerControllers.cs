@@ -77,13 +77,16 @@ namespace SmashBotUltimate.Controllers {
                     existingPlayer.GuildPlayers.Add (receivingGuild);
 
                     Context.Update<Player> (existingPlayer);
-                } else {
+                }
+                else {
                     return BadRequest ("Received player already exists but no new guild was provided or guild already exists");
                 }
-            } else {
+            }
+            else {
                 try {
                     Context.Add<Player> (data);
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     return BadRequest (e);
                 }
             }
@@ -116,6 +119,19 @@ namespace SmashBotUltimate.Controllers {
         #region Aux Functions
         public static void AddPlayer (PlayerContext context, Player player) {
             context.Add<Player> (player);
+            context.SaveChanges ();
+        }
+
+        public static void AddGuild (PlayerContext context, ulong playerId, Guild guild) {
+            var player = GetPlayerWithId (playerId, context, includeGuildPlayer : true);
+            AddGuild (context, player, guild);
+        }
+
+        public static void AddGuild (PlayerContext context, Player player, Guild guild) {
+            var playerGuild = new GuildPlayer { Player = player, PlayerId = player.PlayerId, GuildId = guild.Id, Guild = guild };
+            player.GuildPlayers.Append (playerGuild);
+            context.GuildPlayers.Add (playerGuild);
+            context.Players.Update (player);
             context.SaveChanges ();
         }
 

@@ -34,7 +34,7 @@ namespace SmashBotUltimate.Controllers {
             if (secondPlayer == null)
                 return BadRequest ("id2 not found");
 
-            Match result = MatchController.GetPlayerMatch (ref firstPlayer, ref secondPlayer, context, topic, false);
+            Match result = MatchController.GetPlayerMatch (ref firstPlayer, ref secondPlayer, context, topic);
             if (result == null) {
                 return BadRequest ("couldn't find topic");
             }
@@ -77,8 +77,8 @@ namespace SmashBotUltimate.Controllers {
                 return BadRequest ();
             }
             List<Match> result = new List<Match> ();
-            result.Add (MatchController.GetPlayerMatch (ref firstPlayer, ref secondPlayer, context, topic, true));
-            result.Add (MatchController.GetPlayerMatch (ref secondPlayer, ref firstPlayer, context, topic, true));
+            result.Add (MatchController.GetPlayerMatch (ref firstPlayer, ref secondPlayer, context, topic));
+            result.Add (MatchController.GetPlayerMatch (ref secondPlayer, ref firstPlayer, context, topic));
 
             foreach (var r in result) {
                 r.PendingFight = true;
@@ -145,7 +145,7 @@ namespace SmashBotUltimate.Controllers {
         /// <param name="topic"></param>
         /// <param name="create"></param>
         /// <returns></returns>
-        public static Match GetPlayerMatch (ref Player local, ref Player opposing, PlayerContext context, string topic, bool create) {
+        public static Match GetPlayerMatch (ref Player local, ref Player opposing, PlayerContext context, string topic) {
             Match result = null;
             if (local.PlayerMatches == null) {
                 local.PlayerMatches = new List<Match> ();
@@ -158,7 +158,7 @@ namespace SmashBotUltimate.Controllers {
             ulong opposingId = opposing.PlayerId;
 
             result = (from p in local.PlayerMatches where p.OpponentPlayerId == opposingId && p.Topic.Equals (topic) select p).FirstOrDefault ();
-            if (result == null && create) {
+            if (result == null) {
                 //We didn't find any match, so we create it.
                 result = new Match {
                 OpponentPlayerId = opposingId,
@@ -178,8 +178,8 @@ namespace SmashBotUltimate.Controllers {
 
         public static Match[] GetCompletePlayerMatch (PlayerContext context, ref Player first, ref Player second, string topic, bool create = false) {
             return new Match[] {
-            GetPlayerMatch (ref first, ref second, context, topic, false),
-            GetPlayerMatch (ref second, ref first, context, topic, false),
+            GetPlayerMatch (ref first, ref second, context, topic),
+            GetPlayerMatch (ref second, ref first, context, topic),
             };
         }
 
