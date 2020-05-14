@@ -83,9 +83,8 @@ namespace SmashBotUltimate.Bot {
         }
 
         private Task OnGuildEntered (GuildCreateEventArgs args) {
-            DBService.AddGuild (args.Guild.Id, args.Guild.Name);
             Console.WriteLine ($"SmashBot says hi to guild {args.Guild.Name}!");
-            return Task.CompletedTask;
+            return DBService.AddGuild (args.Guild.Id, args.Guild.Name);;
         }
 
         private Task OnGuildLeave (GuildDeleteEventArgs args) {
