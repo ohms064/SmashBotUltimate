@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using SmashBotUltimate.Bot.Modules.InstructionService;
 using SmashBotUltimate.Bot.Modules.DBContextService;
+using SmashBotUltimate.Bot.Modules.InstructionService;
 
 namespace SmashBotUltimate.Bot.Commands {
     public class UtilsCommands : BaseCommandModule {
@@ -20,8 +20,8 @@ namespace SmashBotUltimate.Bot.Commands {
         [Command ("init")]
         [RequireOwner]
         public async Task Init (CommandContext context) {
-            DBConection.AddGuild(context.Guild.Id, context.Guild.Name);
-            await context.RespondAsync("Added guild to DB");
+            await DBConection.AddGuild (context.Guild.Id, context.Guild.Name);
+            await context.RespondAsync ("Added guild to DB");
         }
     }
 }

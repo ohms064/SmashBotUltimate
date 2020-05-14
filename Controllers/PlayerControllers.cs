@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SmashBotUltimate.Models;
@@ -18,8 +19,8 @@ namespace SmashBotUltimate.Controllers {
         #region HttpGets
 
         [HttpGet ()]
-        public IActionResult GetPlayers () {
-            Player[] result = GetAllPlayers (Context, true, true, true, true);
+        public async Task<IActionResult> GetPlayers () {
+            Player[] result = await GetAllPlayers (Context, true, true, true, true);
 
             if (result == null) {
                 return NotFound ();
@@ -29,9 +30,9 @@ namespace SmashBotUltimate.Controllers {
         }
 
         [HttpGet ("{id}")]
-        public IActionResult GetPlayer (ulong id) {
+        public async Task<IActionResult> GetPlayer (ulong id) {
 
-            Player result = GetPlayerWithId (id, Context, true, true, true, true);
+            Player result = await GetPlayerWithId (id, Context, true, true, true, true);
 
             if (result == null) {
                 return NotFound ();
@@ -42,9 +43,9 @@ namespace SmashBotUltimate.Controllers {
 
         [Route ("name")]
         [HttpGet ("{name}")]
-        public IActionResult GetPlayerByName (string name) {
+        public async Task<IActionResult> GetPlayerByName (string name) {
 
-            Player result = GetPlayerWithName (name, Context, true, true, true, true);
+            Player result = await GetPlayerWithName (name, Context, true, true, true, true);
             if (result == null) {
                 return NotFound ();
             }
@@ -56,10 +57,10 @@ namespace SmashBotUltimate.Controllers {
         #region HttpPost
         [Route ("addplayer")]
         [HttpPost]
-        public IActionResult AddPlayer ([FromBody] Player data) {
+        public async Task<IActionResult> AddPlayer ([FromBody] Player data) {
             if (data == null) return BadRequest ();
 
-            var existingPlayer = GetPlayerWithName (data.Name, Context);
+            var existingPlayer = await GetPlayerWithName (data.Name, Context);
 
             if (existingPlayer != null) {
                 var receivingGuild = data.GuildPlayers.FirstOrDefault ();
@@ -90,10 +91,10 @@ namespace SmashBotUltimate.Controllers {
 
         [Route ("addplayernickname")]
         [HttpPut]
-        public IActionResult AddPlayerNickname ([FromBody] Nickname data) {
+        public async Task<IActionResult> AddPlayerNickname ([FromBody] Nickname data) {
             if (data == null) return BadRequest ();
-            Context.Add<Nickname> (data);
-            Context.SaveChanges ();
+            await Context.AddAsync<Nickname> (data);
+            await Context.SaveChangesAsync ();
 
             return Ok ();
         }
@@ -110,22 +111,22 @@ namespace SmashBotUltimate.Controllers {
         #endregion
 
         #region Aux Functions
-        public static void AddPlayer (PlayerContext context, Player player) {
-            context.Add<Player> (player);
-            context.SaveChanges ();
+        public async static Task AddPlayer (PlayerContext context, Player player) {
+            await context.AddAsync<Player> (player);
+            await context.SaveChangesAsync ();
         }
 
-        public static void AddGuild (PlayerContext context, ulong playerId, Guild guild) {
-            var player = GetPlayerWithId (playerId, context, includeGuildPlayer : true);
-            AddGuild (context, player, guild);
+        public async static Task AddGuild (PlayerContext context, ulong playerId, Guild guild) {
+            var player = await GetPlayerWithId (playerId, context, includeGuildPlayer : true);
+            await AddGuild (context, player, guild);
         }
 
-        public static void AddGuild (PlayerContext context, Player player, Guild guild) {
+        public async static Task AddGuild (PlayerContext context, Player player, Guild guild) {
             var playerGuild = new GuildPlayer { Player = player, PlayerId = player.PlayerId, GuildId = guild.Id, Guild = guild };
             player.GuildPlayers.Append (playerGuild);
-            context.GuildPlayers.Add (playerGuild);
+            await context.GuildPlayers.AddAsync (playerGuild);
             context.Players.Update (player);
-            context.SaveChanges ();
+            await context.SaveChangesAsync ();
         }
 
         /// <summary>
@@ -133,35 +134,35 @@ namespace SmashBotUltimate.Controllers {
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public static Player[] GetAllPlayers (PlayerContext context,
+        public async static Task<Player[]> GetAllPlayers (PlayerContext context,
             bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool includeGuildPlayer = false, bool readOnly = true) {
 
             Player[] result = null;
 
             var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, includeGuildPlayer, readOnly);
 
-            result = (from p in query select p).ToArray ();
+            result = await (from p in query select p).ToArrayAsync ();
 
             return result;
         }
-        public static Player GetPlayerWithId (ulong id, PlayerContext context,
+        public async static Task<Player> GetPlayerWithId (ulong id, PlayerContext context,
             bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool includeGuildPlayer = false, bool readOnly = true) {
             Player result = null;
 
             var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, includeGuildPlayer, readOnly);
 
-            result = (from p in query where p.PlayerId == id select p).FirstOrDefault ();
+            result = await (from p in query where p.PlayerId == id select p).FirstOrDefaultAsync ();
 
             return result;
         }
 
-        public static Player GetPlayerWithName (string name, PlayerContext context,
+        public async static Task<Player> GetPlayerWithName (string name, PlayerContext context,
             bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool includeGuildPlayer = false, bool readOnly = true) {
 
             Player result = null;
             var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, includeGuildPlayer, readOnly);
 
-            result = (from p in query where p.Name == name select p).FirstOrDefault ();
+            result = await (from p in query where p.Name == name select p).FirstOrDefaultAsync ();
             return result;
         }
 

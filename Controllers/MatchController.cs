@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using SmashBotUltimate.Models;
@@ -15,21 +16,21 @@ namespace SmashBotUltimate.Controllers {
         }
 
         [HttpGet ("user")]
-        public IActionResult GetPlayersMatches (ulong id1, ulong id2, string topic) {
+        public async Task<IActionResult> GetPlayersMatches (ulong id1, ulong id2, string topic) {
 
             if (id1 == id2) {
                 return BadRequest ("Ids can't be the same");
             }
 
-            Player firstPlayer = PlayerController.GetPlayerWithId (id1, context, includeMatches : true);
+            Player firstPlayer = await PlayerController.GetPlayerWithId (id1, context, includeMatches : true);
             if (firstPlayer == null)
                 return BadRequest ("id1 not found");
 
-            Player secondPlayer = PlayerController.GetPlayerWithId (id2, context);
+            Player secondPlayer = await PlayerController.GetPlayerWithId (id2, context);
             if (secondPlayer == null)
                 return BadRequest ("id2 not found");
 
-            Match result = MatchController.GetPlayerMatch (ref firstPlayer, ref secondPlayer, context, topic);
+            Match result = await MatchController.GetPlayerMatch (firstPlayer, secondPlayer, context, topic);
             if (result == null) {
                 return BadRequest ("couldn't find topic");
             }
@@ -39,8 +40,8 @@ namespace SmashBotUltimate.Controllers {
         }
 
         [HttpDelete]
-        public IActionResult DeletePlayerMatches ([FromBody] OneId json) {
-            var player = PlayerController.GetPlayerWithId (json.PlayerId, context, readOnly : false);
+        public async Task<IActionResult> DeletePlayerMatches ([FromBody] OneId json) {
+            var player = await PlayerController.GetPlayerWithId (json.PlayerId, context, readOnly : false);
             if (player == null) {
                 return BadRequest ("The id doesn't have an associated player.");
             }
@@ -59,21 +60,21 @@ namespace SmashBotUltimate.Controllers {
         /// <returns></returns>
         [Route ("setmatch")]
         [HttpPost]
-        public IActionResult SetPlayersMatch ([FromBody] TwoIds json) {
+        public async Task<IActionResult> SetPlayersMatch ([FromBody] TwoIds json) {
             ulong firstId = json.WinnerId;
             ulong secondId = json.LoserId;
             string topic = json.Topic ?? Match.DefaultTopic;
-            var firstPlayer = PlayerController.GetPlayerWithId (firstId, context, includeMatches : true, readOnly : false);
+            var firstPlayer = await PlayerController.GetPlayerWithId (firstId, context, includeMatches : true, readOnly : false);
             if (firstPlayer == null) {
                 return BadRequest ();
             }
-            var secondPlayer = PlayerController.GetPlayerWithId (secondId, context, includeOpponentMatches : true, readOnly : false);
+            var secondPlayer = await PlayerController.GetPlayerWithId (secondId, context, includeOpponentMatches : true, readOnly : false);
             if (secondPlayer == null) {
                 return BadRequest ();
             }
             List<Match> result = new List<Match> ();
-            result.Add (MatchController.GetPlayerMatch (ref firstPlayer, ref secondPlayer, context, topic));
-            result.Add (MatchController.GetPlayerMatch (ref secondPlayer, ref firstPlayer, context, topic));
+            result.Add (await MatchController.GetPlayerMatch (firstPlayer, secondPlayer, context, topic));
+            result.Add (await MatchController.GetPlayerMatch (secondPlayer, firstPlayer, context, topic));
 
             foreach (var r in result) {
                 r.PendingFight = true;
@@ -86,20 +87,20 @@ namespace SmashBotUltimate.Controllers {
 
         [Route ("completematch")]
         [HttpPost]
-        public IActionResult CompletePlayersMatch ([FromBody] TwoIds json) {
+        public async Task<IActionResult> CompletePlayersMatch ([FromBody] TwoIds json) {
             ulong id1 = json.WinnerId;
             ulong id2 = json.LoserId;
             string topic = json.Topic ?? Match.DefaultTopic;
-            var winner = PlayerController.GetPlayerWithId (id1, context, includeMatches : true, readOnly : false);
+            var winner = await PlayerController.GetPlayerWithId (id1, context, includeMatches : true, readOnly : false);
             if (winner == null) {
                 return BadRequest ();
             }
-            var loser = PlayerController.GetPlayerWithId (id2, context, readOnly : false);
+            var loser = await PlayerController.GetPlayerWithId (id2, context, readOnly : false);
             if (loser == null) {
                 return BadRequest ();
             }
 
-            var results = GetCompletePlayerMatch (context, ref winner, ref loser, topic);
+            var results = await GetCompletePlayerMatch (context, winner, loser, topic);
 
             var winnerResult = results[0];
             var loserResult = results[1];
@@ -111,7 +112,7 @@ namespace SmashBotUltimate.Controllers {
                 return BadRequest ("No match is pending");
             }
 
-            CompletePlayerMatch (context, ref winnerResult, ref loserResult);
+            await CompletePlayerMatch (context, winnerResult, loserResult);
             return Ok (winnerResult);
 
         }
@@ -140,7 +141,7 @@ namespace SmashBotUltimate.Controllers {
         /// <param name="topic"></param>
         /// <param name="create"></param>
         /// <returns></returns>
-        public static Match GetPlayerMatch (ref Player local, ref Player opposing, PlayerContext context, string topic) {
+        public static async Task<Match> GetPlayerMatch (Player local, Player opposing, PlayerContext context, string topic) {
             Match result = null;
             if (local.PlayerMatches == null) {
                 local.PlayerMatches = new List<Match> ();
@@ -167,32 +168,32 @@ namespace SmashBotUltimate.Controllers {
                 context.Matches.Add (result);
                 context.Update<Player> (local);
                 context.Update<Player> (opposing);
-                context.SaveChanges ();
+                await context.SaveChangesAsync ();
             }
             return result;
         }
 
-        public static Match[] GetCompletePlayerMatch (PlayerContext context, ref Player first, ref Player second, string topic, bool create = false) {
+        public static async Task<Match[]> GetCompletePlayerMatch (PlayerContext context, Player first, Player second, string topic, bool create = false) {
             return new Match[] {
-            GetPlayerMatch (ref first, ref second, context, topic),
-            GetPlayerMatch (ref second, ref first, context, topic),
+            await GetPlayerMatch (first, second, context, topic),
+            await GetPlayerMatch (second, first, context, topic),
             };
         }
 
-        public static void StartPlayerMatch (PlayerContext context, ref Match first, ref Match second) {
+        public static async Task StartPlayerMatch (PlayerContext context, Match first, Match second) {
             first.PendingFight = true;
             second.PendingFight = true;
-            context.SaveChanges ();
+            await context.SaveChangesAsync ();
         }
 
-        public static void CompletePlayerMatch (PlayerContext context, ref Match winnerMatch, ref Match loserMatch) {
+        public static async Task CompletePlayerMatch (PlayerContext context, Match winnerMatch, Match loserMatch) {
             winnerMatch.WinCount++;
             winnerMatch.PendingFight = false;
             loserMatch.PendingFight = false;
             winnerMatch.LastMatch = DateTime.Today;
             context.Update<Match> (winnerMatch);
             context.Update<Match> (loserMatch);
-            context.SaveChanges ();
+            await context.SaveChangesAsync ();
         }
     }
 }

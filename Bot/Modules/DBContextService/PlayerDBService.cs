@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using DSharpPlus.CommandsNext;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using SmashBotUltimate.Controllers;
 using SmashBotUltimate.Models;
@@ -11,24 +11,24 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
             _context = context;
         }
 
-        public Player FindPlayer (ulong id) {
-            return PlayerController.GetPlayerWithId (id, _context);
+        public async Task<Player> FindPlayer (ulong id) {
+            return await PlayerController.GetPlayerWithId (id, _context);
         }
 
-        public Player GetPlayer (DiscordMember member) {
-            var player = PlayerController.GetPlayerWithId (member.Id, _context, includeGuildPlayer : true);
+        public async Task<Player> GetPlayer (DiscordMember member) {
+            var player = await PlayerController.GetPlayerWithId (member.Id, _context, includeGuildPlayer : true);
             if (player == null) {
-                return CreatePlayer (member);
+                return await CreatePlayer (member);
             }
             else if (!player.HasGuildId (member.Guild.Id)) {
-                var guild = GuildController.GetGuildWithId (_context, member.Guild.Id);
-                PlayerController.AddGuild (_context, player, guild);
+                var guild = await GuildController.GetGuildWithId (_context, member.Guild.Id);
+                await PlayerController.AddGuild (_context, player, guild);
             }
             return player;
         }
 
-        public Player CreatePlayer (DiscordMember member) {
-            var guild = GuildController.GetGuildWithId (_context, member.Guild.Id);
+        public async Task<Player> CreatePlayer (DiscordMember member) {
+            var guild = await GuildController.GetGuildWithId (_context, member.Guild.Id);
 
             //No user in database
             Player player = new Player {
@@ -41,45 +41,45 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
                 new GuildPlayer { Guild = guild, GuildId = member.Guild.Id, Player = player, PlayerId = player.PlayerId }
             };
 
-            PlayerController.AddPlayer (_context, player);
+            await PlayerController.AddPlayer (_context, player);
 
             return player;
 
         }
 
-        public bool StartMatch (ulong guildId, DiscordMember firstPlayerId, DiscordMember secondPlayerId) {
-            var currentEvent = GuildController.GetGuildEvent (_context, guildId);
+        public async Task<bool> StartMatch (ulong guildId, DiscordMember firstPlayerId, DiscordMember secondPlayerId) {
+            var currentEvent = await GuildController.GetGuildEvent (_context, guildId);
             if (string.IsNullOrEmpty (currentEvent)) {
                 return false;
             }
 
             currentEvent = $"{guildId}_{currentEvent}";
 
-            var first = GetPlayer (firstPlayerId);
-            var second = GetPlayer (secondPlayerId);
+            var first = await GetPlayer (firstPlayerId);
+            var second = await GetPlayer (secondPlayerId);
 
-            var match = MatchController.GetCompletePlayerMatch (_context, ref first, ref second, currentEvent, true);
+            var match = await MatchController.GetCompletePlayerMatch (_context, first, second, currentEvent, true);
 
-            MatchController.StartPlayerMatch (_context, ref match[0], ref match[1]);
+            await MatchController.StartPlayerMatch (_context, match[0], match[1]);
             return true;
         }
 
-        public bool SetMatch (ulong guildId, DiscordMember winnerMember, DiscordMember loserMember) {
-            var currentEvent = GuildController.GetGuildEvent (_context, guildId);
+        public async Task<bool> SetMatch (ulong guildId, DiscordMember winnerMember, DiscordMember loserMember) {
+            var currentEvent = await GuildController.GetGuildEvent (_context, guildId);
             if (string.IsNullOrEmpty (currentEvent)) {
                 return false;
             }
 
             currentEvent = $"{guildId}_{currentEvent}";
 
-            var winner = GetPlayer (winnerMember);
-            var loser = GetPlayer (loserMember);
+            var winner = await GetPlayer (winnerMember);
+            var loser = await GetPlayer (loserMember);
 
             if (winner == null || loser == null) {
                 return false;
             }
 
-            var match = MatchController.GetCompletePlayerMatch (_context, ref winner, ref loser, currentEvent);
+            var match = await MatchController.GetCompletePlayerMatch (_context, winner, loser, currentEvent);
 
             var winnerMatch = match[0];
             var loserMatch = match[1];
@@ -88,17 +88,18 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
                 return false;
             }
 
-            MatchController.CompletePlayerMatch (_context, ref winnerMatch, ref loserMatch);
+            await MatchController.CompletePlayerMatch (_context, winnerMatch, loserMatch);
 
             return true;
         }
 
-        public ICollection<Player> SearchMatch (DiscordMember member, bool onlyRegistered = false) {
+        public async Task<ICollection<Player>> SearchMatch (DiscordMember member, bool onlyRegistered = false) {
             List<Player> matchmakingOpponents = new List<Player> ();
-            var player = PlayerController.GetPlayerWithId (member.Id, _context, includeMatches : true, readOnly : true);
+            var player = await PlayerController.GetPlayerWithId (member.Id, _context, includeMatches : true, readOnly : true);
             var pendingPlayers = (from m in player.PlayerMatches where m.PendingFight select m.OpponentPlayer);
 
             matchmakingOpponents.AddRange (pendingPlayers);
+
             if (onlyRegistered) {
                 return matchmakingOpponents;
             }
@@ -106,17 +107,17 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
             var except = (from m in player.PlayerMatches select m.OpponentPlayerId);
             except = except.Append (player.PlayerId);
 
-            var players = GuildController.GetPlayersInGuild (_context, member.Guild.Id);
+            var players = await GuildController.GetPlayersInGuild (_context, member.Guild.Id);
             var remaining = from p in players where!except.Contains (p.PlayerId) select p;
 
-            matchmakingOpponents.AddRange (remaining);
+            matchmakingOpponents.InsertRange (0, remaining);
 
             return matchmakingOpponents;
         }
 
-        public void AddGuild (ulong guildId, string guildName) {
+        public async Task AddGuild (ulong guildId, string guildName) {
             var guild = GuildController.GetGuildWithId (_context, guildId);
-            if (guild == null) GuildController.AddGuild (_context, guildId, guildName);
+            if (guild == null) await GuildController.AddGuild (_context, guildId, guildName);
         }
     }
 }

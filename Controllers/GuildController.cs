@@ -1,14 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using SmashBotUltimate.Models;
 
 namespace SmashBotUltimate.Controllers {
@@ -23,8 +17,8 @@ namespace SmashBotUltimate.Controllers {
         }
 
         [HttpGet ()]
-        public IActionResult GetGuilds () {
-            var result = GetAllGuilds (Context, true);
+        public async Task<IActionResult> GetGuilds () {
+            var result = await GetAllGuilds (Context, true);
 
             if (result == null) {
                 return NotFound ();
@@ -34,8 +28,8 @@ namespace SmashBotUltimate.Controllers {
         }
 
         [HttpPut]
-        public IActionResult UpdateGuild (Guild guild) {
-            var updated = UpdateGuild (Context, guild.Id, guild.Name, guild.CurrentMatches);
+        public async Task<IActionResult> UpdateGuild (Guild guild) {
+            var updated = await UpdateGuild (Context, guild.Id, guild.Name, guild.CurrentMatches);
             if (updated == null) {
                 return BadRequest ("No guild to updated");
             }
@@ -43,8 +37,8 @@ namespace SmashBotUltimate.Controllers {
             return Ok (updated);
         }
 
-        public static Guild UpdateGuild (PlayerContext context, ulong guildId, string name = null, string currentMathches = null) {
-            var guild = GetGuildWithId (context, guildId, false);
+        public static async Task<Guild> UpdateGuild (PlayerContext context, ulong guildId, string name = null, string currentMathches = null) {
+            var guild = await GetGuildWithId (context, guildId, false);
             if (guild == null) {
                 return null;
             }
@@ -57,37 +51,37 @@ namespace SmashBotUltimate.Controllers {
             }
 
             context.Guilds.Update (guild);
-            context.SaveChanges ();
+            await context.SaveChangesAsync ();
             return guild;
         }
 
-        public static string GetGuildEvent (PlayerContext context, ulong guildId) {
+        public static async Task<string> GetGuildEvent (PlayerContext context, ulong guildId) {
 
-            var guild = (from g in CreateGuildQuery (context, true) where g.Id == guildId select g).FirstOrDefault ();
+            var guild = await (from g in CreateGuildQuery (context, true) where g.Id == guildId select g).FirstOrDefaultAsync ();
             return guild?.CurrentMatches ?? null;
         }
 
-        public static void AddGuild (PlayerContext context, ulong guildId, string name) {
+        public static async Task AddGuild (PlayerContext context, ulong guildId, string name) {
             var guild = new Guild () { Id = guildId, Name = name, CurrentMatches = "general" };
             context.Guilds.Add (guild);
-            context.SaveChanges ();
+            await context.SaveChangesAsync ();
         }
 
-        public static Guild GetGuildWithId (PlayerContext context, ulong guildId, bool isReadonly = false) {
+        public static async Task<Guild> GetGuildWithId (PlayerContext context, ulong guildId, bool isReadonly = false) {
             var query = CreateGuildQuery (context, isReadonly);
-            return (from q in query where q.Id == guildId select q).FirstOrDefault ();
+            return await (from q in query where q.Id == guildId select q).FirstOrDefaultAsync ();
         }
 
-        public static ICollection<Player> GetPlayersInGuild (PlayerContext context, ulong guildId) {
+        public static async Task<ICollection<Player>> GetPlayersInGuild (PlayerContext context, ulong guildId) {
             var query = CreateGuildPlayerQuery (context);
-            return (from gp in query where gp.GuildId == guildId select gp.Player).ToList ();
+            return await (from gp in query where gp.GuildId == guildId select gp.Player).ToListAsync ();
         }
 
-        public static Guild[] GetAllGuilds (PlayerContext context, bool isReadonly) {
-            return CreateGuildQuery (context, isReadonly).ToArray ();
+        public static async Task<Guild[]> GetAllGuilds (PlayerContext context, bool isReadonly) {
+            return await CreateGuildQuery (context, isReadonly).ToArrayAsync ();
         }
 
-        public static void AddGuildToPlayer (PlayerContext context, ref Guild guild, ref Player player) {
+        public static async Task AddGuildToPlayer (PlayerContext context, Guild guild, Player player) {
             var guildPlayer = new GuildPlayer {
                 PlayerId = player.PlayerId,
                 GuildId = guild.Id,
@@ -97,7 +91,7 @@ namespace SmashBotUltimate.Controllers {
             player.GuildPlayers.Add (guildPlayer);
             context.GuildPlayers.Add (guildPlayer);
             context.Update<Player> (player);
-            context.SaveChanges ();
+            await context.SaveChangesAsync ();
 
         }
 
