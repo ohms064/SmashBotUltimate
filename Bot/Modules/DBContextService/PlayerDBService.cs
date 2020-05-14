@@ -96,15 +96,18 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
         public ICollection<Player> SearchMatch (DiscordMember member, bool onlyRegistered = false) {
             List<Player> matchmakingOpponents = new List<Player> ();
             var player = PlayerController.GetPlayerWithId (member.Id, _context, includeMatches : true, readOnly : true);
-            var registeredPlayers = (from m in player.PlayerMatches where m.PendingFight select m.OpponentPlayer);
+            var pendingPlayers = (from m in player.PlayerMatches where m.PendingFight select m.OpponentPlayer);
 
-            matchmakingOpponents.AddRange (registeredPlayers);
+            matchmakingOpponents.AddRange (pendingPlayers);
             if (onlyRegistered) {
                 return matchmakingOpponents;
             }
 
+            var except = (from m in player.PlayerMatches select m.OpponentPlayerId);
+            except = except.Append (player.PlayerId);
+
             var players = GuildController.GetPlayersInGuild (_context, member.Guild.Id);
-            var remaining = players.Except (registeredPlayers);
+            var remaining = from p in players where!except.Contains (p.PlayerId) select p;
 
             matchmakingOpponents.AddRange (remaining);
 
