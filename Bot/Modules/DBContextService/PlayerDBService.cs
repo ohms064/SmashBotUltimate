@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using SmashBotUltimate.Controllers;
 using SmashBotUltimate.Models;
-
 namespace SmashBotUltimate.Bot.Modules.DBContextService {
     public class PlayerDBService {
         private readonly PlayerContext _context;
@@ -90,7 +91,24 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
             MatchController.CompletePlayerMatch (_context, ref winnerMatch, ref loserMatch);
 
             return true;
+        }
 
+        public ICollection<Player> SearchMatch (DiscordMember member, bool onlyRegistered = false) {
+            List<Player> matchmakingOpponents = new List<Player> ();
+            var player = PlayerController.GetPlayerWithId (member.Id, _context, includeMatches : true, readOnly : true);
+            var registeredPlayers = (from m in player.PlayerMatches where m.PendingFight select m.OpponentPlayer);
+
+            matchmakingOpponents.AddRange (registeredPlayers);
+            if (onlyRegistered) {
+                return matchmakingOpponents;
+            }
+
+            var players = GuildController.GetPlayersInGuild (_context, member.Guild.Id);
+            var remaining = players.Except (registeredPlayers);
+
+            matchmakingOpponents.AddRange (remaining);
+
+            return matchmakingOpponents;
         }
 
         public void AddGuild (ulong guildId, string guildName) {

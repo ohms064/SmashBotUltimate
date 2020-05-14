@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Backend.Models;
@@ -188,6 +189,7 @@ namespace SmashBotUltimate.Controllers {
             winnerMatch.WinCount++;
             winnerMatch.PendingFight = false;
             loserMatch.PendingFight = false;
+            winnerMatch.LastMatch = DateTime.Today;
             context.Update<Match> (winnerMatch);
             context.Update<Match> (loserMatch);
             context.SaveChanges ();

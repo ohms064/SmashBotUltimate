@@ -59,6 +59,32 @@ namespace SmashBotUltimate.Bot.Commands {
 
         }
 
+        [Command ("buscar")]
+        [Aliases ("oponentes")]
+        [Description ("Busca oponentes contra los que no hayas jugado")]
+        public async Task SearchBattles (CommandContext context) {
+
+            const int maxOpponents = 5;
+
+            await context.RespondAsync ("Buscando oponentes");
+            var remainingPlayers = DBConection.SearchMatch (context.Member);
+            if (remainingPlayers == null || remainingPlayers.Count == 0) {
+                await context.RespondAsync ("No hay contrincantes!");
+                return;
+            }
+            System.Text.StringBuilder playerBuilder = new System.Text.StringBuilder ();
+            playerBuilder.Append ("Contricantes: ");
+            int opponentCount = 1;
+            foreach (var opponent in remainingPlayers) {
+                playerBuilder.Append ($" {opponent.Name}");
+                opponentCount++;
+                if (opponentCount == maxOpponents) {
+                    break;
+                }
+            }
+            await context.RespondAsync (playerBuilder.ToString ());
+        }
+
         /// <summary>
         /// Reporta una victoria sobre targetUser.
         /// </summary>

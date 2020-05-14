@@ -78,6 +78,11 @@ namespace SmashBotUltimate.Controllers {
             return (from q in query where q.Id == guildId select q).FirstOrDefault ();
         }
 
+        public static ICollection<Player> GetPlayersInGuild (PlayerContext context, ulong guildId) {
+            var query = CreateGuildPlayerQuery (context);
+            return (from gp in query where gp.GuildId == guildId select gp.Player).ToList ();
+        }
+
         public static Guild[] GetAllGuilds (PlayerContext context, bool isReadonly) {
             return CreateGuildQuery (context, isReadonly).ToArray ();
         }
@@ -98,6 +103,18 @@ namespace SmashBotUltimate.Controllers {
 
         private static IQueryable<Guild> CreateGuildQuery (PlayerContext context, bool isReadonly) {
             return isReadonly ? context.Guilds.AsNoTracking () : context.Guilds;
+        }
+
+        private static IQueryable<GuildPlayer> CreateGuildPlayerQuery (PlayerContext context,
+            bool includeGuild = false, bool includePlayer = false, bool isReadonly = false) {
+            var query = isReadonly ? context.GuildPlayers.AsNoTracking () : context.GuildPlayers;
+            if (includeGuild) {
+                query.Include (gp => gp.Guild);
+            }
+            if (includePlayer) {
+                query.Include (gp => gp.Player);
+            }
+            return query;
         }
     }
 }
