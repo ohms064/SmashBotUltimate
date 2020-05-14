@@ -96,7 +96,7 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
         public async Task<ICollection<Player>> SearchMatch (DiscordMember member, bool onlyRegistered = false) {
             List<Player> matchmakingOpponents = new List<Player> ();
             var player = await PlayerController.GetPlayerWithId (member.Id, _context, includeMatches : true, readOnly : true);
-            var pendingPlayers = (from m in player.PlayerMatches where m.PendingFight select m.OpponentPlayer);
+            var pendingPlayers = (from m in player.PlayerMatches where m.PendingFight orderby m.LastMatch select m.OpponentPlayer);
 
             matchmakingOpponents.AddRange (pendingPlayers);
 
