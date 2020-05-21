@@ -125,7 +125,6 @@ namespace SmashBotUltimate.Controllers {
             var playerGuild = new GuildPlayer { Player = player, PlayerId = player.PlayerId, GuildId = guild.Id, Guild = guild };
             player.GuildPlayers.Append (playerGuild);
             await context.GuildPlayers.AddAsync (playerGuild);
-            context.Players.Update (player);
             await context.SaveChangesAsync ();
         }
 
@@ -135,7 +134,7 @@ namespace SmashBotUltimate.Controllers {
         /// <param name="context"></param>
         /// <returns></returns>
         public async static Task<Player[]> GetAllPlayers (PlayerContext context,
-            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool includeGuildPlayer = false, bool readOnly = true) {
+            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool includeGuildPlayer = false, bool readOnly = false) {
 
             Player[] result = null;
 
@@ -146,7 +145,7 @@ namespace SmashBotUltimate.Controllers {
             return result;
         }
         public async static Task<Player> GetPlayerWithId (ulong id, PlayerContext context,
-            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool includeGuildPlayer = false, bool readOnly = true) {
+            bool includeMatches = false, bool includeOpponentMatches = false, bool includeNicknames = false, bool includeGuildPlayer = false, bool readOnly = false) {
             Player result = null;
 
             var query = CreatePlayerEntities (context, includeMatches, includeOpponentMatches, includeNicknames, includeGuildPlayer, readOnly);

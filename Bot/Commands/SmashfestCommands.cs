@@ -2,23 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
 using SmashBotUltimate.Bot.Extensions;
-using SmashBotUltimate.Bot.Models;
-using SmashBotUltimate.Bot.Modules;
-using SmashBotUltimate.Bot.Modules.InstructionService;
-using SmashBotUltimate.Models;
+using SmashBotUltimate.Bot.Modules.DBContextService;
 
 namespace SmashBotUltimate.Bot.Commands {
 
     [Group ("smashfest")]
-    public class SmashfestCommands : BaseCommandModule {
-        public PlayerContext DBContext { get; set; }
+    public class SmashfestCommands : BaseCommandModule, IMatchmaking {
+        public PlayerDBService DBContext { get; set; }
         public const string Fiend = "fiend";
         public const string Defender = "defender";
         public const string Champion = "champion";
@@ -70,6 +65,8 @@ namespace SmashBotUltimate.Bot.Commands {
             var channelA = await context.Guild.CreateTextChannelAsync ($"{Team}-{teamA}", category, overwrites : teamAPermissions);
             var channelB = await context.Guild.CreateTextChannelAsync ($"{Team}-{teamB}", category, overwrites : teamBPermissions);
 
+            await DBContext.UpdateGuildCurrentMatch (context.Guild.Id, $"{Smashfest}_{teamA}_{teamB}");
+
             await context.RespondAsync ("Finished!");
         }
 
@@ -97,6 +94,8 @@ namespace SmashBotUltimate.Bot.Commands {
             foreach (var channel in channelsToDelete) {
                 await channel.DeleteAsync ();
             }
+
+            await DBContext.ResetGuildCurrentMatch (context.Guild.Id);
 
             await context.RespondAsync ("Finished!");
         }
@@ -171,6 +170,40 @@ namespace SmashBotUltimate.Bot.Commands {
         private bool SmashfestInProgress (CommandContext context) {
             var channels = from c in context.Guild.Channels where ChannelIsFromSmashfest (c.Value) select c.Value;
             return channels.Count () > 0;
+        }
+
+        public string GetKey () {
+            return Smashfest;
+        }
+
+        public async Task<bool> MatchmakingFilter (string topic, DiscordMember challenger, DiscordMember opponentCandidate) {
+            var matches = await DBContext.GetMatches (challenger.Guild.Id, challenger, opponentCandidate);
+            if (!matches[0].PendingFight || !matches[1].PendingFight) return false;
+            var challengerTeam = UserTeam (challenger, topic);
+            var opponentTeam = UserTeam (opponentCandidate, topic);
+            if (challengerTeam < 0 || opponentTeam < 0 || challengerTeam == opponentTeam) return false;
+            return true;
+        }
+
+        private short UserTeam (DiscordMember member, string smashfestTopic) {
+            if (!IsSmashfestTopic (smashfestTopic)) return -1; //Checks if we have an ongoing smashfest
+
+            var smashfestTeams = smashfestTopic.Split ("_");
+
+            var role = member.Roles.FirstOrDefault (r => RoleIsRanked (r));
+            if (role == null) return -1;
+
+            if (role.Name.StartsWith (smashfestTeams[1])) {
+                return 1;
+            }
+            if (role.Name.StartsWith (smashfestTeams[2])) {
+                return 2;
+            }
+            return -1;
+        }
+
+        private bool IsSmashfestTopic (string topic) {
+            return topic.StartsWith (Smashfest);
         }
     }
 }

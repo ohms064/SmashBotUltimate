@@ -1,4 +1,4 @@
-#define CONFIG_FILE
+//define CONFIG_FILE
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -22,9 +22,10 @@ namespace SmashBotUltimate.Bot {
 
         public SmashBot (IServiceProvider services) {
             DBService = (PlayerDBService) services.GetService (typeof (PlayerDBService));
-            const string path = "config.json";
+            const string tokenKey = "smashbot_token";
             string token = "";
 #if CONFIG_FILE
+            const string path = "config.json";
             if (!File.Exists (path)) {
                 new BotConfig ().Save (path);
 
@@ -34,13 +35,10 @@ namespace SmashBotUltimate.Bot {
                 token = BotConfig.FromFile (path).Token;
             }
 #else
-            token = Environment.GetEnvironmentVariable ("smashbot_token", EnvironmentVariableTarget.Machine);
+            token = Environment.GetEnvironmentVariable (tokenKey);
             if (string.IsNullOrEmpty (token)) {
-                Environment.GetEnvironmentVariable ("smashbot_token", EnvironmentVariableTarget.User);
-                if (string.IsNullOrEmpty (token)) {
-                    Console.WriteLine ("El token smashbot_token debe estar registrado en las variables de entorno! El bot no se inició");
-                    return;
-                }
+                Console.WriteLine ($"El token {tokenKey} debe estar registrado en las variables de entorno! El bot no se inició");
+                return;
             }
 #endif
 
@@ -63,7 +61,7 @@ namespace SmashBotUltimate.Bot {
             });
 
             var commandsConfig = new CommandsNextConfiguration {
-                StringPrefixes = new string[] { "!", "!!" },
+                StringPrefixes = new string[] { "s!", "!!" },
                 EnableDms = false,
                 EnableMentionPrefix = true,
                 Services = services
@@ -82,9 +80,11 @@ namespace SmashBotUltimate.Bot {
             return Task.CompletedTask;
         }
 
-        private Task OnGuildEntered (GuildCreateEventArgs args) {
+        private async Task OnGuildEntered (GuildCreateEventArgs args) {
             Console.WriteLine ($"SmashBot says hi to guild {args.Guild.Name}!");
-            return DBService.AddGuild (args.Guild.Id, args.Guild.Name);;
+            var channel = args.Guild.SystemChannel;
+            await channel.SendMessageAsync ($"Saludos {args.Guild.Name}!");
+            await DBService.AddGuild (args.Guild.Id, args.Guild.Name);
         }
 
         private Task OnGuildLeave (GuildDeleteEventArgs args) {

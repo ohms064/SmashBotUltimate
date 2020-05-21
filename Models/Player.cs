@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.EntityFrameworkCore.Sqlite;
 //References : https://stackoverflow.com/questions/39728016/self-referencing-many-to-many-relations
 
 namespace SmashBotUltimate.Models {
@@ -19,9 +14,7 @@ namespace SmashBotUltimate.Models {
         public DbSet<Guild> Guilds { get; set; }
         public DbSet<GuildPlayer> GuildPlayers { get; set; }
 
-        protected override void OnConfiguring (DbContextOptionsBuilder optionsBuilder) {
-            optionsBuilder.UseSqlite ("Data Source=inscripcion.db");
-        }
+        public PlayerContext (DbContextOptions<PlayerContext> options) : base (options) { }
 
         protected override void OnModelCreating (ModelBuilder builder) {
 
@@ -118,6 +111,8 @@ namespace SmashBotUltimate.Models {
     public class Match {
         public const string DefaultTopic = "general";
         public int Id { get; set; }
+
+        public ulong GuildId { get; set; }
 
         public ulong OpponentPlayerId { get; set; }
 

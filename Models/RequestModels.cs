@@ -3,6 +3,8 @@ namespace Backend.Models {
         public ulong WinnerId { get; set; }
         public ulong LoserId { get; set; }
         public string Topic { get; set; }
+
+        public ulong GuildId { get; set; }
     }
 
     public class OneId {

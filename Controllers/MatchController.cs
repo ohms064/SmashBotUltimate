@@ -16,7 +16,7 @@ namespace SmashBotUltimate.Controllers {
         }
 
         [HttpGet ("user")]
-        public async Task<IActionResult> GetPlayersMatches (ulong id1, ulong id2, string topic) {
+        public async Task<IActionResult> GetPlayersMatches (ulong id1, ulong id2, string topic, ulong guildId) {
 
             if (id1 == id2) {
                 return BadRequest ("Ids can't be the same");
@@ -30,7 +30,7 @@ namespace SmashBotUltimate.Controllers {
             if (secondPlayer == null)
                 return BadRequest ("id2 not found");
 
-            Match result = await MatchController.GetPlayerMatch (firstPlayer, secondPlayer, context, topic);
+            Match result = await MatchController.GetPlayerMatch (firstPlayer, secondPlayer, context, topic, guildId);
             if (result == null) {
                 return BadRequest ("couldn't find topic");
             }
@@ -64,6 +64,7 @@ namespace SmashBotUltimate.Controllers {
             ulong firstId = json.WinnerId;
             ulong secondId = json.LoserId;
             string topic = json.Topic ?? Match.DefaultTopic;
+            ulong guildId = json.GuildId;
             var firstPlayer = await PlayerController.GetPlayerWithId (firstId, context, includeMatches : true, readOnly : false);
             if (firstPlayer == null) {
                 return BadRequest ();
@@ -73,8 +74,8 @@ namespace SmashBotUltimate.Controllers {
                 return BadRequest ();
             }
             List<Match> result = new List<Match> ();
-            result.Add (await MatchController.GetPlayerMatch (firstPlayer, secondPlayer, context, topic));
-            result.Add (await MatchController.GetPlayerMatch (secondPlayer, firstPlayer, context, topic));
+            result.Add (await MatchController.GetPlayerMatch (firstPlayer, secondPlayer, context, topic, guildId));
+            result.Add (await MatchController.GetPlayerMatch (secondPlayer, firstPlayer, context, topic, guildId));
 
             foreach (var r in result) {
                 r.PendingFight = true;
@@ -91,6 +92,7 @@ namespace SmashBotUltimate.Controllers {
             ulong id1 = json.WinnerId;
             ulong id2 = json.LoserId;
             string topic = json.Topic ?? Match.DefaultTopic;
+            ulong guildId = json.GuildId;
             var winner = await PlayerController.GetPlayerWithId (id1, context, includeMatches : true, readOnly : false);
             if (winner == null) {
                 return BadRequest ();
@@ -100,7 +102,7 @@ namespace SmashBotUltimate.Controllers {
                 return BadRequest ();
             }
 
-            var results = await GetCompletePlayerMatch (context, winner, loser, topic);
+            var results = await GetCompletePlayerMatch (context, winner, loser, topic, guildId);
 
             var winnerResult = results[0];
             var loserResult = results[1];
@@ -141,7 +143,7 @@ namespace SmashBotUltimate.Controllers {
         /// <param name="topic"></param>
         /// <param name="create"></param>
         /// <returns></returns>
-        public static async Task<Match> GetPlayerMatch (Player local, Player opposing, PlayerContext context, string topic) {
+        public static async Task<Match> GetPlayerMatch (Player local, Player opposing, PlayerContext context, string topic, ulong guildId, bool disconnected = false) {
             Match result = null;
             if (local.PlayerMatches == null) {
                 local.PlayerMatches = new List<Match> ();
@@ -153,30 +155,18 @@ namespace SmashBotUltimate.Controllers {
             ulong playerId = local.PlayerId;
             ulong opposingId = opposing.PlayerId;
 
-            result = (from p in local.PlayerMatches where p.OpponentPlayerId == opposingId && p.Topic.Equals (topic) select p).FirstOrDefault ();
+            result = (from p in local.PlayerMatches where p.OpponentPlayerId == opposingId && p.Topic.Equals (topic) select p).FirstOrDefault (m => m.GuildId == guildId);
             if (result == null) {
                 //We didn't find any match, so we create it.
-                result = new Match {
-                OpponentPlayerId = opposingId,
-                OpponentPlayer = opposing,
-                PendingFight = true,
-                Topic = topic ?? "general"
-                };
-
-                local.PlayerMatches.Add (result);
-                opposing.OpponentMatches.Add (result);
-                context.Matches.Add (result);
-                context.Update<Player> (local);
-                context.Update<Player> (opposing);
-                await context.SaveChangesAsync ();
+                result = await CreateMatch (context, local, opposing, topic, guildId, disconnected);
             }
             return result;
         }
 
-        public static async Task<Match[]> GetCompletePlayerMatch (PlayerContext context, Player first, Player second, string topic, bool create = false) {
+        public static async Task<Match[]> GetCompletePlayerMatch (PlayerContext context, Player first, Player second, string topic, ulong guildId) {
             return new Match[] {
-            await GetPlayerMatch (first, second, context, topic),
-            await GetPlayerMatch (second, first, context, topic),
+                await GetPlayerMatch (first, second, context, topic, guildId),
+                    await GetPlayerMatch (second, first, context, topic, guildId),
             };
         }
 
@@ -194,6 +184,27 @@ namespace SmashBotUltimate.Controllers {
             context.Update<Match> (winnerMatch);
             context.Update<Match> (loserMatch);
             await context.SaveChangesAsync ();
+        }
+
+        private static async Task<Match> CreateMatch (PlayerContext context, Player local, Player opposing, string topic, ulong guildId, bool disconnected) {
+            var result = new Match {
+                OpponentPlayerId = opposing.PlayerId,
+                OpponentPlayer = opposing,
+                PendingFight = true,
+                Topic = topic ?? "general",
+                GuildId = guildId
+            };
+
+            local.PlayerMatches.Add (result);
+            opposing.OpponentMatches.Add (result);
+            context.Matches.Add (result);
+            if (disconnected) {
+                context.Update (local);
+                context.Update (opposing);
+            }
+            await context.SaveChangesAsync ();
+            return result;
+
         }
     }
 }

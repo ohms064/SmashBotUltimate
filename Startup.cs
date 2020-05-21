@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -19,7 +20,10 @@ namespace SmashBotUltimate {
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices (IServiceCollection services) {
 
-            services.AddDbContext<PlayerContext> ();
+            services.AddDbContext<PlayerContext> (options => {
+                var configOptions = Configuration.GetConnectionString ("SmashConnectionSqlite");
+                options.UseSqlite (configOptions);
+            });
 
             services.AddSingleton<IResultService, ResultService> ();
             services.AddSingleton<IGuildService, GuildService> ();
@@ -33,6 +37,14 @@ namespace SmashBotUltimate {
             services.AddSingleton<PlayerDBService> (
                 (serviceProvider) => {
                     return new PlayerDBService (serviceProvider.GetService<PlayerContext> ());
+                }
+            );
+
+            services.AddSingleton<IMatchmakingFilter, MatchmakingFilter> (
+                (serviceProvider) => {
+                    var db = serviceProvider.GetService<PlayerDBService> ();
+                    var matchmakings = serviceProvider.GetServices<IMatchmaking> ();
+                    return new MatchmakingFilter (db, matchmakings);
                 }
             );
 

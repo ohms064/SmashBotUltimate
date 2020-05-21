@@ -37,6 +37,10 @@ namespace SmashBotUltimate.Controllers {
             return Ok (updated);
         }
 
+        public static async Task<Guild> UpdateGuildMatch (PlayerContext context, ulong guildId, string currentMathches) {
+            return await UpdateGuild (context, guildId, currentMathches : currentMathches);
+        }
+
         public static async Task<Guild> UpdateGuild (PlayerContext context, ulong guildId, string name = null, string currentMathches = null) {
             var guild = await GetGuildWithId (context, guildId, false);
             if (guild == null) {
@@ -57,8 +61,8 @@ namespace SmashBotUltimate.Controllers {
 
         public static async Task<string> GetGuildEvent (PlayerContext context, ulong guildId) {
 
-            var guild = await (from g in CreateGuildQuery (context, true) where g.Id == guildId select g).FirstOrDefaultAsync ();
-            return guild?.CurrentMatches ?? null;
+            var guild = await CreateGuildQuery (context, true).FirstOrDefaultAsync (g => g.Id == guildId);
+            return guild?.CurrentMatches ?? "general";
         }
 
         public static async Task AddGuild (PlayerContext context, ulong guildId, string name) {

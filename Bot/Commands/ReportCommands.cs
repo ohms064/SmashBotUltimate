@@ -13,7 +13,6 @@ using SmashBotUltimate.Models;
 namespace SmashBotUltimate.Bot.Commands {
     public class ReportCommands : BaseCommandModule {
 
-        public PlayerContext DBContext { get; set; }
         public IResultService ResultService { get; set; }
         public IChannelRedirectionService ChannelRedirection { get; set; }
 
@@ -68,6 +67,7 @@ namespace SmashBotUltimate.Bot.Commands {
 
             await context.RespondAsync ("Buscando oponentes");
             var remainingPlayers = await DBConection.SearchMatch (context.Member);
+
             if (remainingPlayers == null || remainingPlayers.Count == 0) {
                 await context.RespondAsync ("No hay contrincantes!");
                 return;
@@ -166,7 +166,7 @@ namespace SmashBotUltimate.Bot.Commands {
                 await context.RespondAsync ($"Se ha reportado la victoria de {callingUser.DisplayName}");
             }
             else {
-                await context.RespondAsync ($"Ha habido un problema con tu registro!");
+                await context.RespondAsync ($"No hay peleas pendientes contra {targetUser.DisplayName}!");
             }
 
         }

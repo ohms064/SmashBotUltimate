@@ -125,4 +125,3 @@ D:/Documentos/Trabajo/Gaymers/SmashBotUltimate/bin/Debug/netcoreapp3.1/nuget.con
 /Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/obj/Debug/netcoreapp3.1/SmashBotUltimate.dll
 /Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/obj/Debug/netcoreapp3.1/SmashBotUltimate.pdb
 /Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/obj/Debug/netcoreapp3.1/SmashBotUltimate.genruntimeconfig.cache
-/Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/bin/Debug/netcoreapp3.1/config.json
