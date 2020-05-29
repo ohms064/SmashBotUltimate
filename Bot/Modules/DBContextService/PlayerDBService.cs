@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore;
 using SmashBotUltimate.Controllers;
 using SmashBotUltimate.Models;
 namespace SmashBotUltimate.Bot.Modules.DBContextService {
@@ -13,6 +14,7 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
 
         public PlayerDBService (PlayerContext context) {
             _context = context;
+            _context.Database.Migrate ();
         }
 
         public async Task<Player> FindPlayer (ulong id) {
