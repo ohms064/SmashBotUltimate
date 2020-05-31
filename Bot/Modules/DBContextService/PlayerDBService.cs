@@ -26,8 +26,7 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
             var player = await PlayerController.GetPlayerWithId (member.Id, _context, includeMatches, includeOpponentMatches, includeNicknames, true, false);
             if (player == null) {
                 return await CreatePlayer (member);
-            }
-            else if (!player.HasGuildId (member.Guild.Id)) {
+            } else if (!player.HasGuildId (member.Guild.Id)) {
                 var guild = await GuildController.GetGuildWithId (_context, member.Guild.Id);
                 await PlayerController.AddGuild (_context, player, guild);
             }
@@ -144,6 +143,10 @@ namespace SmashBotUltimate.Bot.Modules.DBContextService {
         public async Task AddGuild (ulong guildId, string guildName) {
             var guild = GuildController.GetGuildWithId (_context, guildId);
             if (guild == null) await GuildController.AddGuild (_context, guildId, guildName);
+        }
+
+        public async Task<Guild[]> GetAllGuilds () {
+            return await GuildController.GetAllGuilds (_context, true);
         }
 
         private async Task<ICollection<DiscordMember>> PlayerToMember (DiscordGuild guild, IEnumerable<Player> players) {

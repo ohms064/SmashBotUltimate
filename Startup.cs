@@ -29,6 +29,7 @@ namespace SmashBotUltimate {
             services.AddSingleton<IGuildService, GuildService> ();
             services.AddSingleton<IChannelRedirectionService, ChannelRedirectionService> ();
             services.AddSingleton<IRandomUtilitiesService, RandomUtilitiesService> ();
+            services.AddSingleton<ILobbyService, LobbyService> ();
             services.AddSingleton<IInteractionService<CoinTossResult, string>, CoinTossService> (
                 (serviceProvider) => {
                     return new CoinTossService (5, serviceProvider.GetService<IRandomUtilitiesService> ());

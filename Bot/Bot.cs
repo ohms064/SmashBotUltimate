@@ -7,6 +7,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using SmashBotUltimate.Bot.Commands;
+using SmashBotUltimate.Bot.Modules;
 using SmashBotUltimate.Bot.Modules.DBContextService;
 using SmashBotUltimate.Models;
 
@@ -20,8 +21,11 @@ namespace SmashBotUltimate.Bot {
 
         public PlayerDBService DBService { get; set; }
 
+        public LobbyService Lobby;
+
         public SmashBot (IServiceProvider services) {
             DBService = (PlayerDBService) services.GetService (typeof (PlayerDBService));
+            Lobby = (LobbyService) services.GetService (typeof (ILobbyService));
             const string tokenKey = "smashbot_token";
             string token = "";
 #if CONFIG_FILE
@@ -30,8 +34,7 @@ namespace SmashBotUltimate.Bot {
                 new BotConfig ().Save (path);
 
                 return;
-            }
-            else {
+            } else {
                 token = BotConfig.FromFile (path).Token;
             }
 #else
@@ -55,6 +58,7 @@ namespace SmashBotUltimate.Bot {
             Client.Ready += OnClientReady;
             Client.GuildCreated += OnGuildEntered;
             Client.GuildDeleted += OnGuildLeave;
+            Client.MessageCreated += Lobby.OnMessage;
 
             Client.UseInteractivity (new InteractivityConfiguration {
                 Timeout = TimeSpan.FromSeconds (20)
@@ -73,10 +77,15 @@ namespace SmashBotUltimate.Bot {
             commands.RegisterCommands<InfoCommands> ();
             commands.RegisterCommands<UtilsCommands> ();
             commands.RegisterCommands<SmashfestCommands> ();
+            commands.RegisterCommands<LobbyCommands> ();
             Client.ConnectAsync ();
         }
 
         private Task OnClientReady (ReadyEventArgs e) {
+            return Task.CompletedTask;
+        }
+
+        private Task OnMessageCreated (MessageCreateEventArgs e) {
             return Task.CompletedTask;
         }
 

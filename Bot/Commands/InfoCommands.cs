@@ -1,5 +1,5 @@
+using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -7,6 +7,10 @@ using DSharpPlus.Interactivity;
 using SmashBotUltimate.Bot.Extensions;
 using SmashBotUltimate.Bot.Models;
 using SmashBotUltimate.Bot.Modules;
+using SmashBotUltimate.Bot.Modules.DBContextService;
+using SmashBotUltimate.Bot.Modules.InstructionService;
+using SmashBotUltimate.Models;
+
 namespace SmashBotUltimate.Bot.Commands {
     public class InfoCommands : BaseCommandModule {
 
