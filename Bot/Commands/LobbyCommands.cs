@@ -10,6 +10,14 @@ namespace SmashBotUltimate.Bot.Commands {
 
         public ILobbyService Lobby { get; set; }
 
+        [Command ("nueva")]
+        [Aliases ("agregar", "add")]
+        private async Task CreateArena (CommandContext context, string id, string password) {
+            var data = new LobbyData { roomId = id, password = password, ownerId = context.Member.Id };
+            Lobby.AddArena (data);
+            await context.RespondAsync ("Se registró la sala!");
+        }
+
         [Command ("buscar")]
         [Aliases ("find", "encontrar")]
         private async Task FindArena (CommandContext context) {

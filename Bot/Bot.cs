@@ -78,6 +78,7 @@ namespace SmashBotUltimate.Bot {
             commands.RegisterCommands<UtilsCommands> ();
             commands.RegisterCommands<SmashfestCommands> ();
             commands.RegisterCommands<LobbyCommands> ();
+            commands.RegisterCommands<DebugCommands> ();
             Client.ConnectAsync ();
         }
 
