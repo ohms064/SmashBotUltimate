@@ -8,6 +8,7 @@ using SmashBotUltimate.Bot;
 using SmashBotUltimate.Bot.Modules;
 using SmashBotUltimate.Bot.Modules.DBContextService;
 using SmashBotUltimate.Bot.Modules.InstructionService;
+using SmashBotUltimate.Bot.Modules.SavedDataServices;
 using SmashBotUltimate.Models;
 namespace SmashBotUltimate {
     public class Startup {
@@ -28,8 +29,14 @@ namespace SmashBotUltimate {
             services.AddSingleton<IResultService, ResultService> ();
             services.AddSingleton<IGuildService, GuildService> ();
             services.AddSingleton<IChannelRedirectionService, ChannelRedirectionService> ();
-            services.AddSingleton<IRandomUtilitiesService, RandomUtilitiesService> ();
-            services.AddSingleton<ILobbyService, LobbyService> ();
+            services.AddTransient<IRandomUtilitiesService, RandomUtilitiesService> ();
+            services.AddTransient<ISavedData<string, TimerData>, TimerService> ();
+
+            services.AddSingleton<ILobbyService, LobbyService> (
+                (serviceProvider) => {
+                    return new LobbyService (serviceProvider.GetService<ISavedData<string, TimerData>> ());
+                }
+            );
             services.AddSingleton<IInteractionService<CoinTossResult, string>, CoinTossService> (
                 (serviceProvider) => {
                     return new CoinTossService (5, serviceProvider.GetService<IRandomUtilitiesService> ());

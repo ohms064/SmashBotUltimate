@@ -30,7 +30,19 @@ namespace SmashBotUltimate.Bot.Commands {
             builder.AppendLine ("Arenas registradas:");
             foreach (var arena in arenas) {
                 var owner = await context.Guild.GetMemberAsync (arena.ownerId);
-                builder.AppendLine ($"{owner.DisplayName}: Id: {arena.roomId}, Pass: {arena.password}");;
+                var duration = arena.Duration (context.Message.Timestamp);
+                var durationBuilder = new System.Text.StringBuilder ();
+                if (duration.Hours > 0) {
+                    durationBuilder.Append ($"{duration.Hours} hora(s) ");
+                }
+                if (duration.Minutes > 0) {
+                    durationBuilder.Append ($"{duration.Minutes} min(s) ");
+                }
+                if (durationBuilder.Length == 0) {
+                    durationBuilder.Append ("¡Recien creada!");
+                }
+
+                builder.AppendLine ($"{owner.DisplayName}: Id: {arena.roomId.ToUpper()}, Pass: {arena.password}, Tiempo: {durationBuilder.ToString()}");
             }
             await context.RespondAsync (builder.ToString ());
         }
@@ -39,9 +51,8 @@ namespace SmashBotUltimate.Bot.Commands {
         private async Task CloseArena (CommandContext context, DiscordMember closingMember) {
             var arena = Lobby.Pop (closingMember.Id);
             if (arena != null) {
-                await context.RespondAsync ($"Se borró la arena de {closingMember.Mention}!");
+                await context.RespondAsync ($"Se borró la arena de { closingMember.Mention }!");
             }
-
         }
 
         [Command ("cerrar")]
@@ -49,6 +60,5 @@ namespace SmashBotUltimate.Bot.Commands {
         private async Task CloseArena (CommandContext context) {
             await CloseArena (context, context.Member);
         }
-
     }
 }
