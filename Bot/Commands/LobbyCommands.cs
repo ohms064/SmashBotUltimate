@@ -25,7 +25,7 @@ namespace SmashBotUltimate.Bot.Commands {
         [Command ("buscar")]
         [Aliases ("find", "encontrar")]
         private async Task FindArena (CommandContext context) {
-            var arenas = await Lobby.GetArenas (context.Guild, context.Channel);
+            var arenas = await Lobby.GetArenas (context.Guild, context.Channel, context.Message.Timestamp);
             if (arenas.Count == 0) {
                 await context.RespondAsync ("No hay arenas registradas. ¡Publica una!");
                 return;

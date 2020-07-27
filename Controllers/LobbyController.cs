@@ -51,5 +51,10 @@ namespace SmashBotUltimate.Controllers {
             context.Lobbies.Update (lobby);
             await context.SaveChangesAsync ();
         }
+
+        public static async Task DeleteLobbies (PlayerContext context, params Lobby[] lobby) {
+            context.Lobbies.RemoveRange (lobby);
+            await context.SaveChangesAsync ();
+        }
     }
 }
