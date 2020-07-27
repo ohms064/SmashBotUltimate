@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,13 +26,15 @@ namespace SmashBotUltimate.Controllers {
             return await context.Lobbies.FindAsync (guildId, channelId, userId);
         }
 
-        public async static Task CreateLobby (PlayerContext context, DiscordGuild guild, DiscordChannel channel, DiscordUser user, string lobbyId, string password) {
+        public async static Task CreateLobby (PlayerContext context, DiscordGuild guild, DiscordChannel channel, DiscordUser user, string lobbyId,
+            string password, DateTimeOffset publishTime) {
             await context.Lobbies.AddAsync (new Lobby () {
                 GuildId = guild.Id,
                     ChannelId = channel.Id,
                     OwnerId = user.Id,
                     RoomId = lobbyId,
-                    Password = password
+                    Password = password,
+                    PublishTime = publishTime
             });
             await context.SaveChangesAsync ();
         }

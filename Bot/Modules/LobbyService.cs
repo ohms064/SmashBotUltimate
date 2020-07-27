@@ -12,7 +12,7 @@ namespace SmashBotUltimate.Bot.Modules {
     public interface ILobbyService {
         Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel);
         Task<Lobby> Pop (DiscordGuild guild, DiscordChannel channel, DiscordUser user);
-        Task AddArena (Lobby data, DiscordGuild guild, DiscordChannel channel, DiscordUser user);
+        Task AddArena (Lobby data, DiscordGuild guild, DiscordChannel channel, DiscordUser user, DateTimeOffset publishTime);
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ namespace SmashBotUltimate.Bot.Modules {
 
         public async Task<bool> ValidateArena (ulong authorId, string text, DateTimeOffset publishTime, DiscordGuild guild, DiscordChannel channel, DiscordUser user) {
             if (HasCompleteArena (authorId, text, publishTime, out Lobby data)) {
-                await AddArena (data, guild, channel, user);
+                await AddArena (data, guild, channel, user, publishTime);
                 return true;
             }
             return false;
@@ -81,16 +81,17 @@ namespace SmashBotUltimate.Bot.Modules {
             return lobby;
         }
 
-        public async Task AddArena (Lobby data, DiscordGuild guild, DiscordChannel channel, DiscordUser user) {
+        public async Task AddArena (Lobby data, DiscordGuild guild, DiscordChannel channel, DiscordUser user, DateTimeOffset publishTime) {
             var existingLobby = await LobbyController.GetLobby (_context, guild, channel, user);
 
             if (existingLobby != null) {
                 existingLobby.RoomId = data.RoomId;
                 existingLobby.Password = data.Password;
+                existingLobby.PublishTime = publishTime;
                 await LobbyController.UpdateLobby (_context, existingLobby);
             } else {
                 var key = new { gId = guild.Id, cId = channel.Id, uId = user.Id };
-                await LobbyController.CreateLobby (_context, guild, channel, user, data.RoomId, data.Password);
+                await LobbyController.CreateLobby (_context, guild, channel, user, data.RoomId, data.Password, publishTime);
                 var timerData = new TimerData { timeSpan = _arenaTimeSpan };
                 timerData.callback += async () => await Pop (guild, channel, user);
                 _deleteTimerService.SaveData (key, timerData);

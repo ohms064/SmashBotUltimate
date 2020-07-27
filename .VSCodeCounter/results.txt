@@ -1,0 +1,104 @@
+Date : 2020-07-26 23:48:09
+Directory : d:\Documentos\Trabajo\Gaymers\SmashBotUltimate
+Total : 61 files,  3051 codes, 145 comments, 693 blanks, all 3889 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| C#                 |         52 |      2,803 |        134 |        679 |      3,616 |
+| Database           |          2 |        149 |          0 |          2 |        151 |
+| JSON               |          3 |         53 |          0 |          3 |         56 |
+| MSBuild            |          1 |         19 |          0 |          0 |         19 |
+| Dockerfile         |          1 |         14 |         11 |          8 |         33 |
+| JSON with Comments |          1 |         11 |          0 |          1 |         12 |
+| Ignore             |          1 |          2 |          0 |          0 |          2 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                    | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                       |         61 |      3,051 |        145 |        693 |      3,889 |
+| Bot                                                                                                     |         27 |      1,232 |         44 |        267 |      1,543 |
+| Bot\Commands                                                                                            |          7 |        467 |         12 |        110 |        589 |
+| Bot\Extensions                                                                                          |          3 |         90 |          6 |         15 |        111 |
+| Bot\Models                                                                                              |          2 |         40 |          0 |          9 |         49 |
+| Bot\Modules                                                                                             |         14 |        548 |         25 |        115 |        688 |
+| Bot\Modules\DBContextService                                                                            |          1 |        122 |          1 |         37 |        160 |
+| Bot\Modules\InstructionService                                                                          |          2 |         71 |         11 |         19 |        101 |
+| Bot\Modules\Matchmaking                                                                                 |          2 |         51 |          0 |          9 |         60 |
+| Bot\Modules\SavedDataServices                                                                           |          2 |         65 |          0 |         10 |         75 |
+| Controllers                                                                                             |          5 |        470 |         34 |        104 |        608 |
+| Migrations                                                                                              |          9 |        853 |          5 |        239 |      1,097 |
+| Models                                                                                                  |          9 |        163 |         26 |         54 |        243 |
+| Properties                                                                                              |          1 |         30 |          0 |          1 |         31 |
++---------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                                                | language           | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\.dockerignore                                            | Ignore             |          2 |          0 |          0 |          2 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Bot.cs                                               | C#                 |         87 |          1 |         18 |        106 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Commands\DebugCommands.cs                            | C#                 |         19 |          0 |          2 |         21 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Commands\InfoCommands.cs                             | C#                 |         31 |          1 |          5 |         37 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Commands\LobbyCommands.cs                            | C#                 |         73 |          4 |         10 |         87 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Commands\ReportCommands.cs                           | C#                 |        130 |          6 |         39 |        175 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Commands\SmashfestCommands.cs                        | C#                 |        165 |          1 |         43 |        209 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Commands\TimerCommands.cs                            | C#                 |         27 |          0 |          6 |         33 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Commands\UtilsCommands.cs                            | C#                 |         22 |          0 |          5 |         27 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Extensions\CommandInteractivityExtensions.cs         | C#                 |         15 |          6 |          5 |         26 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Extensions\DiscordInteractivityPredicate.cs          | C#                 |         31 |          0 |          2 |         33 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Extensions\DiscordInteractivityPredicateBuilder.cs   | C#                 |         44 |          0 |          8 |         52 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Models\BotConfig.cs                                  | C#                 |         17 |          0 |          2 |         19 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Models\Result.cs                                     | C#                 |         23 |          0 |          7 |         30 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\ChannelRedirectionService.cs                 | C#                 |         27 |          0 |          5 |         32 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\ConfigService.cs                             | C#                 |          6 |          0 |          1 |          7 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\DBContextService\PlayerDBService.cs          | C#                 |        122 |          1 |         37 |        160 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\GuildService.cs                              | C#                 |         51 |          0 |          8 |         59 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\InstructionService\BaseInstructionService.cs | C#                 |          9 |          0 |          2 |         11 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\InstructionService\CoinTossService.cs        | C#                 |         62 |         11 |         17 |         90 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\LobbyService.cs                              | C#                 |         98 |         13 |         15 |        126 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\Matchmaking\IMatchmaking.cs                  | C#                 |          6 |          0 |          0 |          6 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\Matchmaking\MatchmakingFilter.cs             | C#                 |         45 |          0 |          9 |         54 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\MessageService.cs                            | C#                 |          6 |          0 |          1 |          7 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\RandomUtilitiesService.cs                    | C#                 |         15 |          0 |          2 |         17 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\ResultService.cs                             | C#                 |         36 |          0 |          8 |         44 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\SavedDataServices\ISavedData.cs              | C#                 |          8 |          0 |          0 |          8 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Bot\Modules\SavedDataServices\TimerService.cs            | C#                 |         57 |          0 |         10 |         67 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Controllers\GuildController.cs                           | C#                 |         96 |          0 |         22 |        118 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Controllers\LobbyController.cs                           | C#                 |         45 |          0 |          7 |         52 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Controllers\MatchController.cs                           | C#                 |        159 |         20 |         32 |        211 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Controllers\PlayerControllers.cs                         | C#                 |        135 |         14 |         38 |        187 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Controllers\WeatherForecastController.cs                 | C#                 |         35 |          0 |          5 |         40 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Dockerfile                                               | Dockerfile         |         14 |         11 |          8 |         33 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Migrations\20200429090247_first.Designer.cs              | C#                 |        124 |          1 |         40 |        165 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Migrations\20200429090247_first.cs                       | C#                 |        138 |          0 |         15 |        153 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Migrations\20200512064545_Second.Designer.cs             | C#                 |        128 |          1 |         42 |        171 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Migrations\20200512064545_Second.cs                      | C#                 |         28 |          0 |          5 |         33 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Migrations\20200514061305_IntervalAddition.Designer.cs   | C#                 |        130 |          1 |         43 |        174 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Migrations\20200514061305_IntervalAddition.cs            | C#                 |         22 |          0 |          3 |         25 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Migrations\20200514074605_MatchWithGuild.Designer.cs     | C#                 |        132 |          1 |         44 |        177 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Migrations\20200514074605_MatchWithGuild.cs              | C#                 |         21 |          0 |          3 |         24 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Migrations\PlayerContextModelSnapshot.cs                 | C#                 |        130 |          1 |         44 |        175 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Models\Guild.cs                                          | C#                 |         12 |          0 |          4 |         16 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Models\GuildPlayer.cs                                    | C#                 |         14 |          9 |          2 |         25 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Models\Lobby.cs                                          | C#                 |         14 |          0 |          1 |         15 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Models\Match.cs                                          | C#                 |         19 |          3 |         11 |         33 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Models\Nickname.cs                                       | C#                 |         12 |          0 |          6 |         18 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Models\Player.cs                                         | C#                 |         22 |          2 |          9 |         33 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Models\PlayerContext.cs                                  | C#                 |         48 |         12 |         14 |         74 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Models\RequestModels.cs                                  | C#                 |         11 |          0 |          2 |         13 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Models\WeatherForecast.cs                                | C#                 |         11 |          0 |          5 |         16 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Program.cs                                               | C#                 |         16 |         20 |          2 |         38 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Properties\launchSettings.json                           | JSON               |         30 |          0 |          1 |         31 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\SmashBotUltimate.csproj                                  | MSBuild            |         19 |          0 |          0 |         19 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\Startup.cs                                               | C#                 |         69 |          5 |         13 |         87 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\appsettings.Development.json                             | JSON               |          9 |          0 |          1 |         10 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\appsettings.json                                         | JSON               |         14 |          0 |          1 |         15 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\inscripcion.db                                           | Database           |         81 |          0 |          2 |         83 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\smashbot.code-workspace                                  | JSON with Comments |         11 |          0 |          1 |         12 |
+| d:\Documentos\Trabajo\Gaymers\SmashBotUltimate\smashbot.db                                              | Database           |         68 |          0 |          0 |         68 |
+| Total                                                                                                   |                    |      3,051 |        145 |        693 |      3,889 |
++---------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+

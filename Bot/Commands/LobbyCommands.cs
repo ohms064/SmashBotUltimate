@@ -18,7 +18,7 @@ namespace SmashBotUltimate.Bot.Commands {
         [Aliases ("agregar", "add")]
         private async Task CreateArena (CommandContext context, string id, string password) {
             var data = new Lobby { RoomId = id, Password = password, OwnerId = context.Member.Id };
-            await Lobby.AddArena (data, context.Guild, context.Channel, context.User);
+            await Lobby.AddArena (data, context.Guild, context.Channel, context.User, context.Message.Timestamp);
             await context.RespondAsync ("Se registró la sala!");
         }
 
