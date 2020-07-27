@@ -129,6 +129,7 @@ namespace SmashBotUltimate.Controllers {
             return Ok ();
         }
 
+        //TODO: Remove context
         public static Match[] GetPlayerMatches (ref Player winner, PlayerContext context) {
             return (from m in winner.PlayerMatches select m).ToArray ();
         }

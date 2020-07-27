@@ -35,16 +35,16 @@ namespace SmashBotUltimate.Bot.Modules.SavedDataServices {
         }
     }
 
-    public class TimerService : ISavedData<string, TimerData> {
-        private Dictionary<string, TimerData> _timers;
+    public class TimerService : ISavedData<object, TimerData> {
+        private Dictionary<object, TimerData> _timers;
 
         public TimerService () {
-            _timers = new Dictionary<string, TimerData> ();
+            _timers = new Dictionary<object, TimerData> ();
         }
-        public bool HasData (string key) {
+        public bool HasData (object key) {
             return _timers.ContainsKey (key);
         }
-        public void SaveData (string key, TimerData data) {
+        public void SaveData (object key, TimerData data) {
             if (_timers.ContainsKey (key)) RemoveData (key);
             data.callback += () => {
                 if (_timers.ContainsKey (key))
@@ -53,13 +53,13 @@ namespace SmashBotUltimate.Bot.Modules.SavedDataServices {
             _timers.Add (key, data);
             data.Start ();
         }
-        public void RemoveData (string key) {
+        public void RemoveData (object key) {
             if (!_timers.ContainsKey (key)) return;
             _timers[key].Cancel ();
             _timers.Remove (key);
         }
 
-        public bool TryGetData (string key, out TimerData value) {
+        public bool TryGetData (object key, out TimerData value) {
             value = null; //We dont really save TimerData.
             return false;
         }

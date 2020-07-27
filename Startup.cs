@@ -30,11 +30,13 @@ namespace SmashBotUltimate {
             services.AddSingleton<IGuildService, GuildService> ();
             services.AddSingleton<IChannelRedirectionService, ChannelRedirectionService> ();
             services.AddTransient<IRandomUtilitiesService, RandomUtilitiesService> ();
-            services.AddTransient<ISavedData<string, TimerData>, TimerService> ();
+            services.AddTransient<ISavedData<object, TimerData>, TimerService> ();
 
             services.AddSingleton<ILobbyService, LobbyService> (
                 (serviceProvider) => {
-                    return new LobbyService (serviceProvider.GetService<ISavedData<string, TimerData>> ());
+                    var context = serviceProvider.GetService<PlayerContext> ();
+                    var timers = serviceProvider.GetService<ISavedData<object, TimerData>> ();
+                    return new LobbyService (timers, context);
                 }
             );
             services.AddSingleton<IInteractionService<CoinTossResult, string>, CoinTossService> (

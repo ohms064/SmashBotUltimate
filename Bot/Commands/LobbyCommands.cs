@@ -1,8 +1,12 @@
+using System.ComponentModel.Design.Serialization;
+using System.Diagnostics.Contracts;
+using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SmashBotUltimate.Bot.Modules;
+using SmashBotUltimate.Models;
 
 namespace SmashBotUltimate.Bot.Commands {
     [Group ("arena")]
@@ -13,23 +17,30 @@ namespace SmashBotUltimate.Bot.Commands {
         [Command ("nueva")]
         [Aliases ("agregar", "add")]
         private async Task CreateArena (CommandContext context, string id, string password) {
-            var data = new LobbyData { roomId = id, password = password, ownerId = context.Member.Id };
-            Lobby.AddArena (data);
+            var data = new Lobby { RoomId = id, Password = password, OwnerId = context.Member.Id };
+            await Lobby.AddArena (data, context.Guild, context.Channel, context.User);
             await context.RespondAsync ("Se registró la sala!");
         }
 
         [Command ("buscar")]
         [Aliases ("find", "encontrar")]
         private async Task FindArena (CommandContext context) {
-            var arenas = Lobby.GetArenas ();
+            var arenas = await Lobby.GetArenas (context.Guild, context.Channel);
             if (arenas.Count == 0) {
                 await context.RespondAsync ("No hay arenas registradas. ¡Publica una!");
                 return;
             }
-            System.Text.StringBuilder builder = new System.Text.StringBuilder ();
-            builder.AppendLine ("Arenas registradas:");
+            StringBuilder nameBuilder = new StringBuilder ();
+            StringBuilder idBuilder = new StringBuilder ();
+            StringBuilder passBuilder = new StringBuilder ();
+            StringBuilder timeBuilder = new StringBuilder ();
+
+            StringBuilder builder = new StringBuilder ();
+            //builder.AppendLine ("Arenas registradas:");
+
+            var embed = new DiscordEmbedBuilder ().WithTitle ("Arenas registradas");
             foreach (var arena in arenas) {
-                var owner = await context.Guild.GetMemberAsync (arena.ownerId);
+                var owner = await context.Guild.GetMemberAsync (arena.OwnerId);
                 var duration = arena.Duration (context.Message.Timestamp);
                 var durationBuilder = new System.Text.StringBuilder ();
                 if (duration.Hours > 0) {
@@ -41,15 +52,27 @@ namespace SmashBotUltimate.Bot.Commands {
                 if (durationBuilder.Length == 0) {
                     durationBuilder.Append ("¡Recien creada!");
                 }
-
-                builder.AppendLine ($"{owner.DisplayName}: Id: {arena.roomId.ToUpper()}, Pass: {arena.password}, Tiempo: {durationBuilder.ToString()}");
+                //embed.AddField("Nombre", owner.DisplayName, true);
+                //embed.AddField (owner.DisplayName, $"Id: {arena.roomId.ToUpper()}, Pass: {arena.password, -9}, Tiempo: {durationBuilder.ToString()}");
+                //builder.AppendLine ($"{owner.DisplayName:0,10}: Id: {arena.roomId.ToUpper()}, Pass: {arena.password, -9}, Tiempo: {durationBuilder.ToString()}");
+                nameBuilder.AppendLine (owner.DisplayName);
+                idBuilder.AppendLine (arena.RoomId.ToUpper ());
+                passBuilder.AppendLine (arena.Password);
+                timeBuilder.AppendLine (durationBuilder.ToString ());
             }
-            await context.RespondAsync (builder.ToString ());
+
+            embed.WithDescription (builder.ToString ());
+            embed.AddField ("Nombre", nameBuilder.ToString (), true);
+            embed.AddField ("Id", idBuilder.ToString (), true);
+            embed.AddField ("Pass", passBuilder.ToString (), true);
+            embed.AddField ("Tiempo", timeBuilder.ToString (), true);
+
+            await context.RespondAsync ("", false, embed);
         }
 
         [Command ("force-cerrar")]
         private async Task CloseArena (CommandContext context, DiscordMember closingMember) {
-            var arena = Lobby.Pop (closingMember.Id);
+            var arena = await Lobby.Pop (context.Guild, context.Channel, context.User);
             if (arena != null) {
                 await context.RespondAsync ($"Se borró la arena de { closingMember.Mention }!");
             }
