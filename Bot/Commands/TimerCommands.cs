@@ -1,3 +1,5 @@
+using System;
+using System.ComponentModel.Design.Serialization;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -8,7 +10,7 @@ namespace SmashBotUltimate.Bot.Commands {
     [Group ("alarma")]
     public class TimerCommands : BaseCommandModule {
 
-        public ISavedData<string, TimerData> Timer { get; set; }
+        public ISavedData<object, TimerData> Timer { get; set; }
 
         [Command ("iniciar")]
         private async Task Minutos (CommandContext context, string args, [RemainingText] string description) {
@@ -18,16 +20,21 @@ namespace SmashBotUltimate.Bot.Commands {
             timerData.callback +=
                 () => context.RespondAsync ($"{context.Member.Mention} se activó la alarma! {timerData.description}");
 
-            Timer.SaveData (context.Member.Mention, timerData);
+            Timer.SaveData (GetKey (context), timerData);
             await context.RespondAsync ($"Se agregó el temporizador {context.Member.Mention}!");
         }
 
         [Command ("cancelar")]
         [Aliases ("terminar")]
         private async Task Cancelar (CommandContext context) {
-            if (!Timer.HasData (context.Member.Mention)) return;
-            Timer.RemoveData (context.Member.Mention);
+            var key = GetKey (context);
+            if (!Timer.HasData (key)) return;
+            Timer.RemoveData (key);
             await context.RespondAsync ("Se canceló la alarma");
+        }
+
+        private object GetKey (CommandContext context) {
+            return new { channel = context.Channel.Id, member = context.Member.Id };
         }
     }
 }
