@@ -2,6 +2,8 @@ using System;
 namespace SmashBotUltimate.Models {
     public class Lobby {
         public ulong GuildId { get; set; }
+
+        public string GlobalId { get; set; }
         public ulong ChannelId { get; set; }
         public string RoomId { get; set; }
         public string Password { get; set; }

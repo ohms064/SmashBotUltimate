@@ -11,7 +11,7 @@ using SmashBotUltimate.Models;
 namespace SmashBotUltimate.Bot.Modules {
 
     public interface ILobbyService {
-        Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime);
+        Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime, bool specialChannel);
         Task<Lobby> Pop (DiscordGuild guild, DiscordChannel channel, DiscordUser user);
         Task AddArena (Lobby data, DiscordGuild guild, DiscordChannel channel, DiscordUser user, DateTimeOffset publishTime);
     }
@@ -41,8 +41,10 @@ namespace SmashBotUltimate.Bot.Modules {
             _completeRegex = new Regex (arenaCompletePattern);
         }
 
-        public async Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime) {
-            var lobbies = await LobbyController.GetLobbies (_context, guild, channel);
+        public async Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime, bool specialChannel) {
+            var lobbies = specialChannel ?
+                await LobbyController.GetLobbies (_context, channel.Name) :
+                await LobbyController.GetLobbies (_context, guild, channel);
             var lobbies2Delete = (from l in lobbies where l.PublishTime.AddHours (HourLimit) <= queryTime select l).ToArray ();
             if (lobbies2Delete.Length == 0) {
                 return lobbies;

@@ -29,19 +29,13 @@ namespace SmashBotUltimate.Bot.Commands {
         [Command ("buscar")]
         [Aliases ("find", "encontrar")]
         private async Task FindArena (CommandContext context) {
-            var arenas = await Lobby.GetArenas (context.Guild, context.Channel, context.Message.Timestamp);
+            var specialArena = context.Channel.IsSpecialChannel ();
+            var arenas = await Lobby.GetArenas (context.Guild, context.Channel, context.Message.Timestamp, specialArena);
             if (arenas.Count == 0) {
                 await context.RespondAsync ("No hay arenas registradas. ¡Publica una!");
                 return;
             }
-#if SINGLE_EMBED
-            //For single embed in message
-            StringBuilder nameBuilder = new StringBuilder ();
-            StringBuilder idBuilder = new StringBuilder ();
-            StringBuilder passBuilder = new StringBuilder ();
-            StringBuilder timeBuilder = new StringBuilder ();
-            var outputEmbed = new DiscordEmbedBuilder ().WithTitle ("Arenas registradas");
-#endif
+
 #if SIMPLE_MESSAGE
             //For simple message
             StringBuilder builder = new StringBuilder ();
@@ -63,33 +57,21 @@ namespace SmashBotUltimate.Bot.Commands {
                 if (durationBuilder.Length == 0) {
                     durationBuilder.Append ("¡Recien creada!");
                 }
-#if SINGLE_EMBED
-                outputEmbed.AddField ("Nombre", owner.DisplayName, true);
-                //embed.AddField (owner.DisplayName, $"Id: {arena.roomId.ToUpper()}, Pass: {arena.password, -9}, Tiempo: {durationBuilder.ToString()}");
-                nameBuilder.AppendLine (owner.DisplayName);
-                idBuilder.AppendLine (arena.RoomId.ToUpper ());
-                passBuilder.AppendLine (arena.Password);
-                timeBuilder.AppendLine (durationBuilder.ToString ());
-#endif
+
 #if SIMPLE_MESSAGE
                 builder.AppendLine ($"{owner.DisplayName,-10} Id: {arena.RoomId.ToUpper()}\tPass: {arena.Password, -9}\tTiempo: {durationBuilder.ToString()}");
 #endif
 #if EMBED
-                var userEmnbed = new DiscordEmbedBuilder ().WithTitle (owner.DisplayName);
+
+                var title = specialArena ? $"{owner.DisplayName} from {context.Guild.Name}" : owner.DisplayName;
+                var userEmnbed = new DiscordEmbedBuilder ().WithTitle (title);
                 userEmnbed.AddField ("Id", arena.RoomId.ToUpper (), true);
                 userEmnbed.AddField ("Pass", arena.Password, true);
                 userEmnbed.AddField ("Tiempo", durationBuilder.ToString (), true);
                 await context.RespondAsync ("", false, userEmnbed);
 #endif
             }
-#if SINGLE_EMBED
-            outputEmbed.WithDescription (builder.ToString ());
-            outputEmbed.AddField ("Nombre", nameBuilder.ToString (), true);
-            outputEmbed.AddField ("Id", idBuilder.ToString (), true);
-            outputEmbed.AddField ("Pass", passBuilder.ToString (), true);
-            outputEmbed.AddField ("Tiempo", timeBuilder.ToString (), true);
-            await context.RespondAsync ("", false, outputEmbed);
-#endif
+
 #if SIMPLE_MESSAGE
             await context.RespondAsync (builder.ToString ());
 #endif
