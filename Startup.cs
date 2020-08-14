@@ -35,8 +35,7 @@ namespace SmashBotUltimate {
             services.AddSingleton<ILobbyService, LobbyService> (
                 (serviceProvider) => {
                     var context = serviceProvider.GetService<PlayerContext> ();
-                    var timers = serviceProvider.GetService<ISavedData<object, TimerData>> ();
-                    return new LobbyService (timers, context);
+                    return new LobbyService (context);
                 }
             );
             services.AddSingleton<IInteractionService<CoinTossResult, string>, CoinTossService> (

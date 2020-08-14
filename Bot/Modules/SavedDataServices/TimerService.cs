@@ -60,8 +60,7 @@ namespace SmashBotUltimate.Bot.Modules.SavedDataServices {
         }
 
         public bool TryGetData (object key, out TimerData value) {
-            value = null; //We dont really save TimerData.
-            return false;
+            return _timers.TryGetValue (key, out value);
         }
     }
 }

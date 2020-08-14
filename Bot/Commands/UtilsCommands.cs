@@ -19,6 +19,7 @@ namespace SmashBotUltimate.Bot.Commands {
 
         [Command ("init")]
         [RequireOwner]
+        [Hidden]
         public async Task Init (CommandContext context) {
             await DBConection.AddGuild (context.Guild.Id, context.Guild.Name);
             await context.RespondAsync ("Added guild to DB");

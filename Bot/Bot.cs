@@ -73,12 +73,12 @@ namespace SmashBotUltimate.Bot {
 
             var commands = Client.UseCommandsNext (commandsConfig);
 
-            commands.RegisterCommands<ReportCommands> ();
-            commands.RegisterCommands<InfoCommands> ();
+            //commands.RegisterCommands<ReportCommands> ();
+            //commands.RegisterCommands<InfoCommands> ();
             commands.RegisterCommands<UtilsCommands> ();
-            commands.RegisterCommands<SmashfestCommands> ();
+            //commands.RegisterCommands<SmashfestCommands> ();
             commands.RegisterCommands<LobbyCommands> ();
-            commands.RegisterCommands<DebugCommands> ();
+            //commands.RegisterCommands<DebugCommands> ();
             commands.RegisterCommands<TimerCommands> ();
             Client.ConnectAsync ();
         }

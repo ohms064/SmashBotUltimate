@@ -14,27 +14,27 @@ namespace SmashBotUltimate.Bot.Modules {
         Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime, bool specialChannel);
         Task<Lobby> Pop (DiscordGuild guild, DiscordChannel channel, DiscordUser user);
         Task AddArena (Lobby data, DiscordGuild guild, DiscordChannel channel, DiscordUser user, DateTimeOffset publishTime);
+
+        bool ResetTimer (DiscordGuild guild, DiscordChannel channel, DiscordUser user);
     }
 
     /// <summary>
     /// Controls the arenas created from Smash Bros Ultimate. After certain hours passes the arena automatically shuts down.
     /// </summary>
     public class LobbyService : ILobbyService {
-        private const int HourLimit = 3;
+        private const int HourLimit = 4;
         private const string arenaIdPattern = @"(\w{5})";
         private const string arenaPassPattern = @"(\d+)";
         private const string arenaCompletePattern = @"\b(\w{5})\s?(/|-)\s?(\d{1,8})\b";
 
         private PlayerContext _context;
-        private ISavedData<object, TimerData> _deleteTimerService;
         private Regex _completeRegex, _passRegex, _idRegex;
 
         private TimeSpan _arenaTimeSpan;
 
-        public LobbyService (ISavedData<object, TimerData> deleteTimerService, PlayerContext context) {
+        public LobbyService (PlayerContext context) {
             _context = context;
-            _deleteTimerService = deleteTimerService;
-            _arenaTimeSpan = new TimeSpan (HourLimit, 0, 0);
+            _arenaTimeSpan = TimeSpan.FromHours (HourLimit);
 
             _passRegex = new Regex (arenaPassPattern);
             _idRegex = new Regex (arenaIdPattern);
@@ -45,10 +45,12 @@ namespace SmashBotUltimate.Bot.Modules {
             var lobbies = specialChannel ?
                 await LobbyController.GetLobbies (_context, channel.Name) :
                 await LobbyController.GetLobbies (_context, guild, channel);
+
             var lobbies2Delete = (from l in lobbies where l.PublishTime.AddHours (HourLimit) <= queryTime select l).ToArray ();
             if (lobbies2Delete.Length == 0) {
                 return lobbies;
             }
+
             await LobbyController.DeleteLobbies (_context, lobbies2Delete);
             return await LobbyController.GetLobbies (_context, guild, channel);;
         }
@@ -61,16 +63,6 @@ namespace SmashBotUltimate.Bot.Modules {
             if (await ValidateArena (authorId, args.Message.Content, args.Message.Timestamp, args.Guild, args.Channel, args.Author)) {
                 await args.Channel.SendMessageAsync ("Se agregó la arena!");
             }
-            /*
-            if (HasArenaId (authorId, args.Message.Content, out LobbyData partialData)) {
-                AddArena (authorId, partialData);
-                return;
-            }
-            if (UpdateArenaPassword (authorId, args.Message.Content)) {
-                await args.Channel.SendMessageAsync ("Se agregó la sala!");
-                return;
-            }
-            */
         }
 
         public async Task<bool> ValidateArena (ulong authorId, string text, DateTimeOffset publishTime, DiscordGuild guild, DiscordChannel channel, DiscordUser user) {
@@ -84,7 +76,7 @@ namespace SmashBotUltimate.Bot.Modules {
         public async Task<Lobby> Pop (DiscordGuild guild, DiscordChannel channel, DiscordUser user) {
             var lobby = await LobbyController.PopLobby (_context, guild, channel, user);
             if (lobby != null) {
-                _deleteTimerService.RemoveData (new { gId = guild.Id, cId = channel.Id, uId = user.Id });
+
                 return lobby;
             }
             return lobby;
@@ -101,10 +93,11 @@ namespace SmashBotUltimate.Bot.Modules {
             } else {
                 var key = new { gId = guild.Id, cId = channel.Id, uId = user.Id };
                 await LobbyController.CreateLobby (_context, guild, channel, user, data.RoomId, data.Password, publishTime);
-                var timerData = new TimerData { timeSpan = _arenaTimeSpan };
-                timerData.callback += async () => await Pop (guild, channel, user);
-                _deleteTimerService.SaveData (key, timerData);
             }
+        }
+
+        public bool ResetTimer (DiscordGuild guild, DiscordChannel channel, DiscordUser user) {
+            return false;
         }
 
         private bool HasCompleteArena (ulong authorId, string text, DateTimeOffset publishTime, out Lobby data) {

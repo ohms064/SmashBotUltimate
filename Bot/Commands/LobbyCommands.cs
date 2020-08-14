@@ -20,7 +20,8 @@ namespace SmashBotUltimate.Bot.Commands {
 
         [Command ("nueva")]
         [Aliases ("agregar", "add")]
-        private async Task CreateArena (CommandContext context, string id, string password) {
+        [Description ("Creates a new arena with provided ID and Password. Password can be omitted.")]
+        private async Task CreateArena (CommandContext context, string id, string password = "") {
             var data = new Lobby { RoomId = id, Password = password, OwnerId = context.Member.Id };
             await Lobby.AddArena (data, context.Guild, context.Channel, context.User, context.Message.Timestamp);
             await context.RespondAsync ("Se registró la sala!");
@@ -28,6 +29,7 @@ namespace SmashBotUltimate.Bot.Commands {
 
         [Command ("buscar")]
         [Aliases ("find", "encontrar")]
+        [Description ("Finds any registered areanas")]
         private async Task FindArena (CommandContext context) {
             var specialArena = context.Channel.IsSpecialChannel ();
             var arenas = await Lobby.GetArenas (context.Guild, context.Channel, context.Message.Timestamp, specialArena);
@@ -78,18 +80,27 @@ namespace SmashBotUltimate.Bot.Commands {
 
         }
 
-        [Command ("force-cerrar")]
+        [Command ("force-close")]
+        [Description ("Closes the provided member arena.")]
         private async Task CloseArena (CommandContext context, DiscordMember closingMember) {
-            var arena = await Lobby.Pop (context.Guild, context.Channel, context.User);
+            var arena = await Lobby.Pop (context.Guild, context.Channel, closingMember);
             if (arena != null) {
                 await context.RespondAsync ($"Se borró la arena de { closingMember.Mention }!");
             }
         }
 
         [Command ("cerrar")]
-        [Aliases ("close", "terminar")]
+        [Aliases ("close", "terminar", "borrar")]
         private async Task CloseArena (CommandContext context) {
             await CloseArena (context, context.Member);
+        }
+
+        [Command ("reset")]
+        [Aliases ("reiniciar")]
+        private async Task ResetArena (CommandContext context) {
+            if (Lobby.ResetTimer (context.Guild, context.Channel, context.User)) {
+                await context.RespondAsync ($"Se reinició la arena de {context.User.Mention}.");
+            }
         }
     }
 }
