@@ -9,6 +9,7 @@ namespace SmashBotUltimate.Models {
         public string Password { get; set; }
         public ulong OwnerId { get; set; }
         public DateTimeOffset PublishTime { get; set; }
+        public DateTimeOffset RemovalReferenceTime { get; set; }
 
         public TimeSpan Duration (DateTimeOffset other) {
             return other - PublishTime;

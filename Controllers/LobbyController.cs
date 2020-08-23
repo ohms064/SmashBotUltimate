@@ -39,6 +39,7 @@ namespace SmashBotUltimate.Controllers {
                     RoomId = lobbyId,
                     Password = password,
                     PublishTime = publishTime,
+                    RemovalReferenceTime = publishTime,
                     GlobalId = channel.Name
             });
             await context.SaveChangesAsync ();

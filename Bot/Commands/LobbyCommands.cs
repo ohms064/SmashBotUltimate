@@ -98,7 +98,7 @@ namespace SmashBotUltimate.Bot.Commands {
         [Command ("reset")]
         [Aliases ("reiniciar")]
         private async Task ResetArena (CommandContext context) {
-            if (Lobby.ResetTimer (context.Guild, context.Channel, context.User)) {
+            if (await Lobby.ResetTimer (context.Guild, context.Channel, context.User, context.Message.Timestamp)) {
                 await context.RespondAsync ($"Se reinició la arena de {context.User.Mention}.");
             }
         }
