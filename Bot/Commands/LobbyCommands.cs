@@ -1,9 +1,4 @@
-//#define SIMPLE_MESSAGE
-//#define SINGLE_EMBED
-#define EMBED
-
-using System.ComponentModel.Design.Serialization;
-using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -11,7 +6,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using SmashBotUltimate.Bot.Modules;
 using SmashBotUltimate.Models;
-
 namespace SmashBotUltimate.Bot.Commands {
     [Group ("arena")]
     public class LobbyCommands : BaseCommandModule {
@@ -20,9 +14,28 @@ namespace SmashBotUltimate.Bot.Commands {
 
         [Command ("nueva")]
         [Aliases ("agregar", "add")]
-        private async Task CreateArena (CommandContext context, string id, string password) {
-            var data = new Lobby { RoomId = id, Password = password, OwnerId = context.Member.Id };
-            await Lobby.AddArena (data, context.Guild, context.Channel, context.User, context.Message.Timestamp);
+        private async Task CreateArena (CommandContext context, string id, [RemainingText] string remainder) {
+            if (!Lobby.IsLobby (id)) {
+                await context.RespondAsync ("Formato del ID incorrecto");
+                return;
+            }
+
+            string password = "";
+            StringBuilder comment = new StringBuilder (); //todo: use methods that convert automatically to Lobby so validations aren't made in here
+            var rem = remainder.Split (' ');
+            if (rem.Length > 0) {
+                password = rem[0];
+                int initialCount = 0;
+                if (Lobby.IsPassword (password)) initialCount = 1;
+                for (int i = initialCount; i < rem.Length; i++) {
+                    comment.Append ($"{rem[i]} ");
+                }
+            }
+            var data = new Lobby { //TODO: Lobby creation may should be handled differently
+                RoomId = id, Password = password, OwnerId = context.Member.Id, Comment = comment.ToString (),
+                GuildId = context.Guild.Id, ChannelId = context.Channel.Id, PublishTime = context.Message.Timestamp
+            };
+            await Lobby.AddArena (data);
             await context.RespondAsync ("Se registró la sala!");
         }
 
@@ -34,22 +47,9 @@ namespace SmashBotUltimate.Bot.Commands {
                 await context.RespondAsync ("No hay arenas registradas. ¡Publica una!");
                 return;
             }
-#if SINGLE_EMBED
-            //For single embed in message
-            StringBuilder nameBuilder = new StringBuilder ();
-            StringBuilder idBuilder = new StringBuilder ();
-            StringBuilder passBuilder = new StringBuilder ();
-            StringBuilder timeBuilder = new StringBuilder ();
-            var outputEmbed = new DiscordEmbedBuilder ().WithTitle ("Arenas registradas");
-#endif
-#if SIMPLE_MESSAGE
-            //For simple message
-            StringBuilder builder = new StringBuilder ();
-            builder.AppendLine ("Arenas registradas:");
-#endif
-#if EMBED
+
             await context.RespondAsync ("Arenas registradas");
-#endif
+
             foreach (var arena in arenas) {
                 var owner = await context.Guild.GetMemberAsync (arena.OwnerId);
                 var duration = arena.Duration (context.Message.Timestamp);
@@ -63,42 +63,21 @@ namespace SmashBotUltimate.Bot.Commands {
                 if (durationBuilder.Length == 0) {
                     durationBuilder.Append ("¡Recien creada!");
                 }
-#if SINGLE_EMBED
-                outputEmbed.AddField ("Nombre", owner.DisplayName, true);
-                //embed.AddField (owner.DisplayName, $"Id: {arena.roomId.ToUpper()}, Pass: {arena.password, -9}, Tiempo: {durationBuilder.ToString()}");
-                nameBuilder.AppendLine (owner.DisplayName);
-                idBuilder.AppendLine (arena.RoomId.ToUpper ());
-                passBuilder.AppendLine (arena.Password);
-                timeBuilder.AppendLine (durationBuilder.ToString ());
-#endif
-#if SIMPLE_MESSAGE
-                builder.AppendLine ($"{owner.DisplayName,-10} Id: {arena.RoomId.ToUpper()}\tPass: {arena.Password, -9}\tTiempo: {durationBuilder.ToString()}");
-#endif
-#if EMBED
+
                 var userEmnbed = new DiscordEmbedBuilder ().WithTitle (owner.DisplayName);
                 userEmnbed.AddField ("Id", arena.RoomId.ToUpper (), true);
                 userEmnbed.AddField ("Pass", arena.Password, true);
                 userEmnbed.AddField ("Tiempo", durationBuilder.ToString (), true);
+                if (arena.HasComment) userEmnbed.AddField ("Extras", arena.Comment);
                 await context.RespondAsync ("", false, userEmnbed);
-#endif
             }
-#if SINGLE_EMBED
-            outputEmbed.WithDescription (builder.ToString ());
-            outputEmbed.AddField ("Nombre", nameBuilder.ToString (), true);
-            outputEmbed.AddField ("Id", idBuilder.ToString (), true);
-            outputEmbed.AddField ("Pass", passBuilder.ToString (), true);
-            outputEmbed.AddField ("Tiempo", timeBuilder.ToString (), true);
-            await context.RespondAsync ("", false, outputEmbed);
-#endif
-#if SIMPLE_MESSAGE
-            await context.RespondAsync (builder.ToString ());
-#endif
 
         }
 
-        [Command ("force-cerrar")]
+        [Command ("force-close")]
+        [Aliases ("forzar-cierre")]
         private async Task CloseArena (CommandContext context, DiscordMember closingMember) {
-            var arena = await Lobby.Pop (context.Guild, context.Channel, context.User);
+            var arena = await Lobby.Pop (context.Guild.Id, context.Channel.Id, context.User.Id);
             if (arena != null) {
                 await context.RespondAsync ($"Se borró la arena de { closingMember.Mention }!");
             }

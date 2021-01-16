@@ -1,4 +1,4 @@
-//define CONFIG_FILE
+#define CONFIG_FILE
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -34,7 +34,8 @@ namespace SmashBotUltimate.Bot {
                 new BotConfig ().Save (path);
 
                 return;
-            } else {
+            }
+            else {
                 token = BotConfig.FromFile (path).Token;
             }
 #else

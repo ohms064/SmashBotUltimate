@@ -12,8 +12,11 @@ namespace SmashBotUltimate.Bot.Modules {
 
     public interface ILobbyService {
         Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime);
-        Task<Lobby> Pop (DiscordGuild guild, DiscordChannel channel, DiscordUser user);
-        Task AddArena (Lobby data, DiscordGuild guild, DiscordChannel channel, DiscordUser user, DateTimeOffset publishTime);
+        Task<Lobby> Pop (ulong guild, ulong channel, ulong user);
+        Task AddArena (Lobby data);
+
+        bool IsPassword (string pass);
+        bool IsLobby (string lobby);
     }
 
     /// <summary>
@@ -22,7 +25,7 @@ namespace SmashBotUltimate.Bot.Modules {
     public class LobbyService : ILobbyService {
         private const int HourLimit = 3;
         private const string arenaIdPattern = @"(\w{5})";
-        private const string arenaPassPattern = @"(\d+)";
+        private const string arenaPassPattern = @"(\d{1,8})";
         private const string arenaCompletePattern = @"\b(\w{5})\s?(/|-)\s?(\d{1,8})\b";
 
         private PlayerContext _context;
@@ -73,36 +76,49 @@ namespace SmashBotUltimate.Bot.Modules {
 
         public async Task<bool> ValidateArena (ulong authorId, string text, DateTimeOffset publishTime, DiscordGuild guild, DiscordChannel channel, DiscordUser user) {
             if (HasCompleteArena (authorId, text, publishTime, out Lobby data)) {
-                await AddArena (data, guild, channel, user, publishTime);
+                data.GuildId = guild.Id;
+                data.ChannelId = channel.Id;
+                data.OwnerId = user.Id;
+                await AddArena (data);
                 return true;
             }
             return false;
         }
 
-        public async Task<Lobby> Pop (DiscordGuild guild, DiscordChannel channel, DiscordUser user) {
+        public async Task<Lobby> Pop (ulong guild, ulong channel, ulong user) {
             var lobby = await LobbyController.PopLobby (_context, guild, channel, user);
             if (lobby != null) {
-                _deleteTimerService.RemoveData (new { gId = guild.Id, cId = channel.Id, uId = user.Id });
+                _deleteTimerService.RemoveData (new { gId = guild, cId = channel, uId = user });
                 return lobby;
             }
             return lobby;
         }
 
-        public async Task AddArena (Lobby data, DiscordGuild guild, DiscordChannel channel, DiscordUser user, DateTimeOffset publishTime) {
-            var existingLobby = await LobbyController.GetLobby (_context, guild, channel, user);
+        public async Task AddArena (Lobby data) {
+            var existingLobby = await LobbyController.GetLobby (_context, data.GuildId, data.ChannelId, data.OwnerId);
 
             if (existingLobby != null) {
                 existingLobby.RoomId = data.RoomId;
                 existingLobby.Password = data.Password;
-                existingLobby.PublishTime = publishTime;
+                existingLobby.PublishTime = data.PublishTime;
                 await LobbyController.UpdateLobby (_context, existingLobby);
-            } else {
-                var key = new { gId = guild.Id, cId = channel.Id, uId = user.Id };
-                await LobbyController.CreateLobby (_context, guild, channel, user, data.RoomId, data.Password, publishTime);
+            }
+            else {
+                var key = new { gId = data.GuildId, cId = data.ChannelId, uId = data.OwnerId };
+                await LobbyController.CreateLobby (_context, data);
                 var timerData = new TimerData { timeSpan = _arenaTimeSpan };
-                timerData.callback += async () => await Pop (guild, channel, user);
+                timerData.callback += async () => await Pop (data.GuildId, data.ChannelId, data.OwnerId);
                 _deleteTimerService.SaveData (key, timerData);
             }
+        }
+
+        public bool IsPassword (string pass) {
+            var match = _passRegex.Match (pass);
+            return match.Success;
+        }
+        public bool IsLobby (string lobby) {
+            var match = _idRegex.Match (lobby);
+            return match.Success;
         }
 
         private bool HasCompleteArena (ulong authorId, string text, DateTimeOffset publishTime, out Lobby data) {
