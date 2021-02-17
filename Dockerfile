@@ -30,10 +30,3 @@ EXPOSE 80
 
 COPY --from=builder /app/out .
 ENTRYPOINT ["dotnet", "SmashBotUltimate.dll"]
-
-#RUN THE FOLLOWING COMMAND
-#dotnet ef migrations add <name>
-#dotnet ef database update 
-#docker run -e smashbot_token=NzAxNTc1MTcyNTE1MTY4MzU4.XsN3cQ.J3F515iIhPSEslawCHdWyq4J5Oc -p 8080:8080 -d ohms064/smashbotultimate as smashbot
-#docker run -e smashbot_token=NzE5MDkxMjIyMTI3NTc1MTMx.XtyX4w.99oJiJHhCi_Wb2cj4oKfQY99tsg -p 8080:8080 -d ohms064/smashbotultimate as smashbot_debug
-#docker build -t ohms064/smashbotultimate .

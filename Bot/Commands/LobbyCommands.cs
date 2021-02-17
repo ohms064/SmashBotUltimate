@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SmashBotUltimate.Bot.Converters;
 using SmashBotUltimate.Bot.Modules;
 using SmashBotUltimate.Models;
 namespace SmashBotUltimate.Bot.Commands {
@@ -12,31 +13,19 @@ namespace SmashBotUltimate.Bot.Commands {
 
         public ILobbyService Lobby { get; set; }
 
+        public IConvert<Lobby> Converter { get; set; }
+
         [Command ("nueva")]
         [Aliases ("agregar", "add")]
-        private async Task CreateArena (CommandContext context, string id, [RemainingText] string remainder) {
-            if (!Lobby.IsLobby (id)) {
-                await context.RespondAsync ("Formato del ID incorrecto");
-                return;
-            }
-
-            string password = "";
-            StringBuilder comment = new StringBuilder (); //todo: use methods that convert automatically to Lobby so validations aren't made in here
-            var rem = remainder.Split (' ');
-            if (rem.Length > 0) {
-                password = rem[0];
-                int initialCount = 0;
-                if (Lobby.IsPassword (password)) initialCount = 1;
-                for (int i = initialCount; i < rem.Length; i++) {
-                    comment.Append ($"{rem[i]} ");
-                }
-            }
-            var data = new Lobby { //TODO: Lobby creation may should be handled differently
-                RoomId = id, Password = password, OwnerId = context.Member.Id, Comment = comment.ToString (),
-                GuildId = context.Guild.Id, ChannelId = context.Channel.Id, PublishTime = context.Message.Timestamp
-            };
+        private async Task CreateArena (CommandContext context, [RemainingText] string args) {
+            if (!Converter.Convert (args, context, out Lobby data)) return;
             await Lobby.AddArena (data);
             await context.RespondAsync ("Se registró la sala!");
+        }
+
+        [Command ("Test")]
+        private async Task Test (CommandContext context, bool s) {
+            await context.RespondAsync ($"Se ingresó {s}");
         }
 
         [Command ("buscar")]
@@ -66,10 +55,10 @@ namespace SmashBotUltimate.Bot.Commands {
 
                 var userEmnbed = new DiscordEmbedBuilder ().WithTitle (owner.DisplayName);
                 userEmnbed.AddField ("Id", arena.RoomId.ToUpper (), true);
-                userEmnbed.AddField ("Pass", arena.Password, true);
+                if (arena.HasPassword) userEmnbed.AddField ("Pass", arena.Password, true);
                 userEmnbed.AddField ("Tiempo", durationBuilder.ToString (), true);
                 if (arena.HasComment) userEmnbed.AddField ("Extras", arena.Comment);
-                await context.RespondAsync ("", false, userEmnbed);
+                await context.RespondAsync (userEmnbed);
             }
 
         }
