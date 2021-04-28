@@ -11,7 +11,7 @@ using SmashBotUltimate.Models;
 namespace SmashBotUltimate.Bot.Modules {
 
     public interface ILobbyService {
-        Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime, bool specialChannel);
+        Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime, bool global);
         Task<Lobby> Pop (DiscordGuild guild, DiscordChannel channel, DiscordUser user);
         Task AddArena (Lobby data, DiscordGuild guild, DiscordChannel channel, DiscordUser user, DateTimeOffset publishTime);
 
@@ -42,7 +42,7 @@ namespace SmashBotUltimate.Bot.Modules {
 
         public async Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime, bool specialChannel) {
             var lobbies = specialChannel ?
-                await LobbyController.GetLobbies (_context, channel.Name) :
+                await LobbyController.GetGlobalLobbies (_context) :
                 await LobbyController.GetLobbies (_context, guild, channel);
 
             var lobbies2Delete = (from l in lobbies where l.RemovalReferenceTime.AddHours (HourLimit) <= queryTime select l).ToArray ();
@@ -80,6 +80,12 @@ namespace SmashBotUltimate.Bot.Modules {
             }
             return lobby;
         }
+        public async Task MakeArenaGlobal (DiscordGuild guild, DiscordChannel channel, DiscordUser user) {
+            var lobby = await LobbyController.GetLobby (_context, guild, channel, user);
+            if (lobby.Global) return;
+            lobby.Global = true;
+            await LobbyController.UpdateLobby (_context, lobby);
+        }
 
         public async Task AddArena (Lobby data, DiscordGuild guild, DiscordChannel channel, DiscordUser user, DateTimeOffset publishTime) {
             var existingLobby = await LobbyController.GetLobby (_context, guild, channel, user);
@@ -91,10 +97,15 @@ namespace SmashBotUltimate.Bot.Modules {
                 await LobbyController.UpdateLobby (_context, existingLobby);
             } else {
                 var key = new { gId = guild.Id, cId = channel.Id, uId = user.Id };
-                await LobbyController.CreateLobby (_context, guild, channel, user, data.RoomId, data.Password, publishTime);
+                await LobbyController.CreateLobby (_context, guild, channel, user, data.RoomId, data.Password, data.Global, publishTime);
             }
         }
 
+        /// <summary>
+        /// Resets the timer for the provided Lobby.
+        /// </summary>
+        /// <param name="resetTime">The new time that will be used for reference.</param>
+        /// <returns>If any lobby was found that could be reseted.</returns>
         public async Task<bool> ResetTimer (DiscordGuild guild, DiscordChannel channel, DiscordUser user, DateTimeOffset resetTime) {
             var lobby = await LobbyController.GetLobby (_context, guild, channel, user);
             if (lobby == null) return false;
@@ -102,6 +113,9 @@ namespace SmashBotUltimate.Bot.Modules {
             return true;
         }
 
+        /// <summary>
+        /// Checks if the received text matches with the Regex.
+        /// <returns>If the arena is valid.</returns>
         private bool HasCompleteArena (ulong authorId, string text, DateTimeOffset publishTime, out Lobby data) {
             var match = _completeRegex.Match (text);
             if (match.Success) {
@@ -116,6 +130,7 @@ namespace SmashBotUltimate.Bot.Modules {
             return false;
         }
 
+        //TODO: For arenas with no password?
         private bool HasArenaId (ulong authorId, string text, out Lobby data) {
             var match = _idRegex.Match (text);
             if (match.Success) {

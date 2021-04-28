@@ -11,6 +11,8 @@ namespace SmashBotUltimate.Models {
 
         public ICollection<GuildPlayer> GuildPlayers { get; set; }
         public string CurrentMatches { get; set; }
+
+        public ulong GlobalArenaChannel = 0;
     }
 
 }

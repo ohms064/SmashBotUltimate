@@ -26,12 +26,12 @@ namespace SmashBotUltimate.Controllers {
             return await context.Lobbies.FindAsync (guildId, channelId, userId);
         }
 
-        public async static Task<ICollection<Lobby>> GetLobbies (PlayerContext context, string channel) {
+        public async static Task<ICollection<Lobby>> GetGlobalLobbies (PlayerContext context) {
 
-            return await (from lobby in context.Lobbies where lobby.GlobalId.Equals (channel) select lobby).ToListAsync ();
+            return await (from lobby in context.Lobbies where lobby.Global select lobby).ToListAsync ();
         }
         public async static Task CreateLobby (PlayerContext context, DiscordGuild guild, DiscordChannel channel, DiscordUser user, string lobbyId,
-            string password, DateTimeOffset publishTime) {
+            string password, bool global, DateTimeOffset publishTime) {
             await context.Lobbies.AddAsync (new Lobby () {
                 GuildId = guild.Id,
                     ChannelId = channel.Id,
@@ -40,7 +40,7 @@ namespace SmashBotUltimate.Controllers {
                     Password = password,
                     PublishTime = publishTime,
                     RemovalReferenceTime = publishTime,
-                    GlobalId = channel.Name
+                    Global = global
             });
             await context.SaveChangesAsync ();
         }
