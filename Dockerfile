@@ -5,6 +5,10 @@ WORKDIR /app
 COPY nuget.config *.csproj ./
 RUN dotnet restore 
 
+#Run database creation
+#RUN dotnet ef migrations add BASE
+#RUN dotnet ef database update 
+
 # Copy everything else and build
 COPY . ./
 RUN dotnet publish -c Release -o out
@@ -26,8 +30,3 @@ EXPOSE 80
 
 COPY --from=builder /app/out .
 ENTRYPOINT ["dotnet", "SmashBotUltimate.dll"]
-
-#RUN THE FOLLOWING COMMAND
-#docker run -e smashbot_token=NzAxNTc1MTcyNTE1MTY4MzU4.XsN3cQ.J3F515iIhPSEslawCHdWyq4J5Oc -p 8080:8080 -d ohms064/smashbotultimate as smashbot
-#docker run -e smashbot_token=NzE5MDkxMjIyMTI3NTc1MTMx.XtyX9A.TH658wGxs4Hs2v_rg2DzY7_Y78o -p 8080:8080 -d ohms064/smashbotultimate as smashbot_debug
-#docker build -t ohms064/smashbotultimate .

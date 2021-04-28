@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SmashBotUltimate.Bot;
+using SmashBotUltimate.Bot.Converters;
 using SmashBotUltimate.Bot.Modules;
 using SmashBotUltimate.Bot.Modules.DBContextService;
 using SmashBotUltimate.Bot.Modules.InstructionService;
@@ -31,11 +32,13 @@ namespace SmashBotUltimate {
             services.AddSingleton<IChannelRedirectionService, ChannelRedirectionService> ();
             services.AddTransient<IRandomUtilitiesService, RandomUtilitiesService> ();
             services.AddTransient<ISavedData<object, TimerData>, TimerService> ();
+            services.AddSingleton<IConvert<Lobby>, LobbyConverter> ();
 
             services.AddSingleton<ILobbyService, LobbyService> (
                 (serviceProvider) => {
                     var context = serviceProvider.GetService<PlayerContext> ();
-                    return new LobbyService (context);
+                    var timers = serviceProvider.GetService<ISavedData<object, TimerData>> ();
+                    return new LobbyService (timers, context, new Bot.Validators.LobbyValidator ());
                 }
             );
             services.AddSingleton<IInteractionService<CoinTossResult, string>, CoinTossService> (
@@ -64,6 +67,7 @@ namespace SmashBotUltimate {
             services.AddSingleton<SmashBot> (new SmashBot (serviceProvider));
 
             services.AddControllers ();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,4 +1,4 @@
-//define CONFIG_FILE
+#define CONFIG_FILE
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -6,11 +6,12 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using SmashBotUltimate.Bot.Commands;
+using SmashBotUltimate.Bot.Converters;
 using SmashBotUltimate.Bot.Modules;
 using SmashBotUltimate.Bot.Modules.DBContextService;
 using SmashBotUltimate.Models;
-
 namespace SmashBotUltimate.Bot {
     public class SmashBot {
         public DiscordClient Client { get; set; }
@@ -34,7 +35,8 @@ namespace SmashBotUltimate.Bot {
                 new BotConfig ().Save (path);
 
                 return;
-            } else {
+            }
+            else {
                 token = BotConfig.FromFile (path).Token;
             }
 #else
@@ -48,9 +50,7 @@ namespace SmashBotUltimate.Bot {
             var config = new DiscordConfiguration {
                 Token = token,
                 TokenType = TokenType.Bot,
-                AutoReconnect = true,
-                LogLevel = LogLevel.Info,
-                UseInternalLogHandler = true,
+                AutoReconnect = true
             };
 
             Client = new DiscordClient (config);
@@ -83,7 +83,7 @@ namespace SmashBotUltimate.Bot {
             Client.ConnectAsync ();
         }
 
-        private Task OnClientReady (ReadyEventArgs e) {
+        private Task OnClientReady (DiscordClient client, ReadyEventArgs e) {
             return Task.CompletedTask;
         }
 
@@ -91,14 +91,14 @@ namespace SmashBotUltimate.Bot {
             return Task.CompletedTask;
         }
 
-        private async Task OnGuildEntered (GuildCreateEventArgs args) {
+        private async Task OnGuildEntered (DiscordClient client, GuildCreateEventArgs args) {
             Console.WriteLine ($"SmashBot says hi to guild {args.Guild.Name}!");
             var channel = args.Guild.SystemChannel;
             await channel.SendMessageAsync ($"Saludos {args.Guild.Name}!");
             await DBService.AddGuild (args.Guild.Id, args.Guild.Name);
         }
 
-        private Task OnGuildLeave (GuildDeleteEventArgs args) {
+        private Task OnGuildLeave (DiscordClient client, GuildDeleteEventArgs args) {
             Console.WriteLine ($"Smashbot says bye bye to {args.Guild.Name}");
             return Task.CompletedTask;
         }

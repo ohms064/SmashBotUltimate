@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using SmashBotUltimate.Bot.Extensions;
 using SmashBotUltimate.Bot.Models;
 using SmashBotUltimate.Bot.Modules;

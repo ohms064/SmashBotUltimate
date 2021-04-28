@@ -45,7 +45,12 @@ namespace SmashBotUltimate.Controllers {
             await context.SaveChangesAsync ();
         }
 
-        public async static Task<Lobby> PopLobby (PlayerContext context, DiscordGuild guild, DiscordChannel channel, DiscordUser user) {
+        public async static Task CreateLobby (PlayerContext context, Lobby lobby) {
+            await context.Lobbies.AddAsync (lobby);
+            await context.SaveChangesAsync ();
+        }
+
+        public async static Task<Lobby> PopLobby (PlayerContext context, ulong guild, ulong channel, ulong user) {
             var lobby = await GetLobby (context, guild, channel, user);
             if (lobby == null) return null;
             context.Lobbies.Remove (lobby);

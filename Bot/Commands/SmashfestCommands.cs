@@ -33,7 +33,7 @@ namespace SmashBotUltimate.Bot.Commands {
             }
 
             if (teamA.Equals (teamB)) {
-                await context.RespondWithFileAsync ("Los equipos tienen el mismo nombre!");
+                await context.RespondAsync ("Los equipos tienen el mismo nombre!");
             }
 
             await context.ReplyAsync ("Creating roles");

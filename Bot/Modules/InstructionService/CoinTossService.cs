@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using SmashBotUltimate.Bot.Extensions;
 namespace SmashBotUltimate.Bot.Modules.InstructionService {
     public class CoinTossService : IInteractionService<CoinTossResult, string> {

@@ -1,30 +1,31 @@
-//#define SIMPLE_MESSAGE
-//#define SINGLE_EMBED
-#define EMBED
-
-using System.ComponentModel.Design.Serialization;
-using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using SmashBotUltimate.Bot.Converters;
 using SmashBotUltimate.Bot.Modules;
 using SmashBotUltimate.Models;
-
 namespace SmashBotUltimate.Bot.Commands {
     [Group ("arena")]
     public class LobbyCommands : BaseCommandModule {
 
         public ILobbyService Lobby { get; set; }
 
+        public IConvert<Lobby> Converter { get; set; }
+
         [Command ("nueva")]
         [Aliases ("agregar", "add")]
-        [Description ("Creates a new arena with provided ID and Password. Password can be omitted.")]
-        private async Task CreateArena (CommandContext context, string id, string password = "") {
-            var data = new Lobby { RoomId = id, Password = password, OwnerId = context.Member.Id };
-            await Lobby.AddArena (data, context.Guild, context.Channel, context.User, context.Message.Timestamp);
+        private async Task CreateArena (CommandContext context, [RemainingText] string args) {
+            if (!Converter.Convert (args, context, out Lobby data)) return;
+            await Lobby.AddArena (data);
             await context.RespondAsync ("Se registró la sala!");
+        }
+
+        [Command ("Test")]
+        private async Task Test (CommandContext context, bool s) {
+            await context.RespondAsync ($"Se ingresó {s}");
         }
 
         [Command ("buscar")]
@@ -38,14 +39,8 @@ namespace SmashBotUltimate.Bot.Commands {
                 return;
             }
 
-#if SIMPLE_MESSAGE
-            //For simple message
-            StringBuilder builder = new StringBuilder ();
-            builder.AppendLine ("Arenas registradas:");
-#endif
-#if EMBED
             await context.RespondAsync ("Arenas registradas");
-#endif
+
             foreach (var arena in arenas) {
                 var owner = await context.Guild.GetMemberAsync (arena.OwnerId);
                 var duration = arena.Duration (context.Message.Timestamp);
@@ -60,30 +55,20 @@ namespace SmashBotUltimate.Bot.Commands {
                     durationBuilder.Append ("¡Recien creada!");
                 }
 
-#if SIMPLE_MESSAGE
-                builder.AppendLine ($"{owner.DisplayName,-10} Id: {arena.RoomId.ToUpper()}\tPass: {arena.Password, -9}\tTiempo: {durationBuilder.ToString()}");
-#endif
-#if EMBED
-
-                var title = specialArena ? $"{owner.DisplayName} from {context.Guild.Name}" : owner.DisplayName;
-                var userEmnbed = new DiscordEmbedBuilder ().WithTitle (title);
+                var userEmnbed = new DiscordEmbedBuilder ().WithTitle (owner.DisplayName);
                 userEmnbed.AddField ("Id", arena.RoomId.ToUpper (), true);
-                userEmnbed.AddField ("Pass", arena.Password, true);
+                if (arena.HasPassword) userEmnbed.AddField ("Pass", arena.Password, true);
                 userEmnbed.AddField ("Tiempo", durationBuilder.ToString (), true);
-                await context.RespondAsync ("", false, userEmnbed);
-#endif
+                if (arena.HasComment) userEmnbed.AddField ("Extras", arena.Comment);
+                await context.RespondAsync (userEmnbed);
             }
-
-#if SIMPLE_MESSAGE
-            await context.RespondAsync (builder.ToString ());
-#endif
 
         }
 
         [Command ("force-close")]
-        [Description ("Closes the provided member arena.")]
+        [Aliases ("forzar-cierre")]
         private async Task CloseArena (CommandContext context, DiscordMember closingMember) {
-            var arena = await Lobby.Pop (context.Guild, context.Channel, closingMember);
+            var arena = await Lobby.Pop (context.Guild.Id, context.Channel.Id, context.User.Id);
             if (arena != null) {
                 await context.RespondAsync ($"Se borró la arena de { closingMember.Mention }!");
             }
