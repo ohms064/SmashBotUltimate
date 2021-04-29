@@ -23,9 +23,10 @@ namespace SmashBotUltimate.Bot.Commands {
             await context.RespondAsync ("Se registró la sala!");
         }
 
-        [Command ("Test")]
-        private async Task Test (CommandContext context, bool s) {
-            await context.RespondAsync ($"Se ingresó {s}");
+        [Command ("comentario")]
+        private async Task ChangeComment (CommandContext context, [RemainingText] string comment) {
+            await Lobby.ChangeComment (context.Guild, context.Channel, context.User, comment);
+            await context.RespondAsync ("Se actualizó el comentario!");
         }
 
         [Command ("buscar")]

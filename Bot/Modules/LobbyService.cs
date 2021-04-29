@@ -15,8 +15,8 @@ namespace SmashBotUltimate.Bot.Modules {
         Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime, bool specialChannel);
         Task<Lobby> Pop (ulong guild, ulong channel, ulong user);
         Task AddArena (Lobby data);
-
         Task<bool> ResetTimer (DiscordGuild guild, DiscordChannel channel, DiscordUser user, DateTimeOffset resetTime);
+        Task ChangeComment (DiscordGuild guild, DiscordChannel channel, DiscordUser user, string comment);
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ namespace SmashBotUltimate.Bot.Modules {
             }
 
             await LobbyController.DeleteLobbies (_context, lobbies2Delete);
-            return await LobbyController.GetLobbies (_context, guild, channel);;
+            return await LobbyController.GetLobbies (_context, guild, channel);
         }
 
         public async Task OnMessage (DiscordClient client, MessageCreateEventArgs args) {
@@ -86,6 +86,12 @@ namespace SmashBotUltimate.Bot.Modules {
             var lobby = await LobbyController.GetLobby (_context, guild, channel, user);
             if (lobby.Global) return;
             lobby.Global = true;
+            await LobbyController.UpdateLobby (_context, lobby);
+        }
+
+        public async Task ChangeComment (DiscordGuild guild, DiscordChannel channel, DiscordUser user, string comment) {
+            var lobby = await LobbyController.GetLobby (_context, guild, channel, user);
+            lobby.Comment = comment;
             await LobbyController.UpdateLobby (_context, lobby);
         }
 
@@ -126,16 +132,6 @@ namespace SmashBotUltimate.Bot.Modules {
             if (_validator.IsComplete (text, out data)) {
                 data.OwnerId = authorId;
                 data.PublishTime = publishTime;
-                return true;
-            }
-            return false;
-        }
-
-        //TODO: For arenas with no password?
-        private bool HasArenaId (ulong authorId, string text, out Lobby data) {
-
-            if (_validator.IsLobby (text, out data)) {
-                data.OwnerId = authorId;
                 return true;
             }
             return false;
