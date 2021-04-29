@@ -12,16 +12,17 @@ using SmashBotUltimate.Models;
 namespace SmashBotUltimate.Bot.Modules {
 
     public interface ILobbyService {
-        Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime);
+        Task<ICollection<Lobby>> GetArenas (DiscordGuild guild, DiscordChannel channel, DateTimeOffset queryTime, bool specialChannel);
         Task<Lobby> Pop (ulong guild, ulong channel, ulong user);
         Task AddArena (Lobby data);
+
+        Task<bool> ResetTimer (DiscordGuild guild, DiscordChannel channel, DiscordUser user, DateTimeOffset resetTime);
     }
 
     /// <summary>
     /// Controls the arenas created from Smash Bros Ultimate. After certain hours passes the arena automatically shuts down.
     /// </summary>
     public class LobbyService : ILobbyService {
-        private const int HourLimit = 3;
 
         private PlayerContext _context;
         private ISavedData<object, TimerData> _deleteTimerService;
@@ -34,7 +35,7 @@ namespace SmashBotUltimate.Bot.Modules {
             PlayerContext context, LobbyValidator validator) {
             _context = context;
             _deleteTimerService = deleteTimerService;
-            _arenaTimeSpan = new TimeSpan (HourLimit, 0, 0);
+            _arenaTimeSpan = new TimeSpan (Lobby.HourLimit, 0, 0);
             _validator = validator;
         }
 
@@ -43,7 +44,7 @@ namespace SmashBotUltimate.Bot.Modules {
                 await LobbyController.GetGlobalLobbies (_context) :
                 await LobbyController.GetLobbies (_context, guild, channel);
 
-            var lobbies2Delete = (from l in lobbies where l.RemovalReferenceTime.AddHours (HourLimit) <= queryTime select l).ToArray ();
+            var lobbies2Delete = (from l in lobbies where l.RemovalReferenceTime.AddHours (Lobby.HourLimit) <= queryTime select l).ToArray ();
             if (lobbies2Delete.Length == 0) {
                 return lobbies;
             }
@@ -97,8 +98,7 @@ namespace SmashBotUltimate.Bot.Modules {
                 existingLobby.Comment = data.Comment;
                 existingLobby.PublishTime = data.PublishTime;
                 await LobbyController.UpdateLobby (_context, existingLobby);
-            }
-            else {
+            } else {
                 var key = new { gId = data.GuildId, cId = data.ChannelId, uId = data.OwnerId };
                 await LobbyController.CreateLobby (_context, data);
                 var timerData = new TimerData { timeSpan = _arenaTimeSpan };

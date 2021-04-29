@@ -28,8 +28,7 @@ namespace SmashBotUltimate.Bot.Converters {
             if (args.Length > 1 && _validator.IsPassword (args[1])) {
                 remainder++;
                 lobby.Password = args[1];
-            }
-            else {
+            } else {
                 lobby.Password = "";
             }
 
@@ -47,7 +46,6 @@ namespace SmashBotUltimate.Bot.Converters {
             lobby.ChannelId = context.Channel.Id;
             lobby.OwnerId = context.Member.Id;
             lobby.PublishTime = context.Message.Timestamp;
-
             return true;
         }
     }

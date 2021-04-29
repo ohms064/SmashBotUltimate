@@ -11,10 +11,10 @@
           "lib/netstandard2.0/ConcurrentCollections.dll": {}
         }
       },
-      "DSharpPlus/4.0.0-nightly-00783": {
+      "DSharpPlus/4.0.0-nightly-00822": {
         "type": "package",
         "dependencies": {
-          "Emzi0767.Common": "2.2.2",
+          "Emzi0767.Common": "2.4.1",
           "Microsoft.Extensions.Logging.Abstractions": "5.0.0",
           "Newtonsoft.Json": "12.0.3",
           "System.Memory": "4.5.4",
@@ -30,10 +30,10 @@
           "lib/netstandard2.0/DSharpPlus.dll": {}
         }
       },
-      "DSharpPlus.CommandsNext/4.0.0-nightly-00783": {
+      "DSharpPlus.CommandsNext/4.0.0-nightly-00822": {
         "type": "package",
         "dependencies": {
-          "DSharpPlus": "4.0.0-nightly-00783",
+          "DSharpPlus": "4.0.0-nightly-00822",
           "Microsoft.Extensions.DependencyInjection": "5.0.1"
         },
         "compile": {
@@ -43,11 +43,11 @@
           "lib/netstandard2.0/DSharpPlus.CommandsNext.dll": {}
         }
       },
-      "DSharpPlus.Interactivity/4.0.0-nightly-00783": {
+      "DSharpPlus.Interactivity/4.0.0-nightly-00822": {
         "type": "package",
         "dependencies": {
           "ConcurrentHashSet": "1.1.0",
-          "DSharpPlus": "4.0.0-nightly-00783"
+          "DSharpPlus": "4.0.0-nightly-00822"
         },
         "compile": {
           "lib/netstandard2.0/DSharpPlus.Interactivity.dll": {}
@@ -56,12 +56,12 @@
           "lib/netstandard2.0/DSharpPlus.Interactivity.dll": {}
         }
       },
-      "Emzi0767.Common/2.2.2": {
+      "Emzi0767.Common/2.4.1": {
         "type": "package",
         "dependencies": {
-          "System.Collections.Immutable": "1.7.0",
+          "System.Collections.Immutable": "5.0.0",
           "System.Memory": "4.5.4",
-          "System.Runtime.CompilerServices.Unsafe": "4.7.1",
+          "System.Runtime.CompilerServices.Unsafe": "5.0.0",
           "System.ValueTuple": "4.5.0"
         },
         "compile": {
@@ -696,7 +696,7 @@
           "lib/netstandard1.3/System.Collections.Concurrent.dll": {}
         }
       },
-      "System.Collections.Immutable/1.7.0": {
+      "System.Collections.Immutable/5.0.0": {
         "type": "package",
         "compile": {
           "lib/netstandard2.0/System.Collections.Immutable.dll": {}
@@ -1139,10 +1139,10 @@
           "ref/netstandard1.5/System.Runtime.dll": {}
         }
       },
-      "System.Runtime.CompilerServices.Unsafe/4.7.1": {
+      "System.Runtime.CompilerServices.Unsafe/5.0.0": {
         "type": "package",
         "compile": {
-          "ref/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll": {}
+          "ref/netstandard2.1/System.Runtime.CompilerServices.Unsafe.dll": {}
         },
         "runtime": {
           "lib/netcoreapp2.0/System.Runtime.CompilerServices.Unsafe.dll": {}
@@ -1615,50 +1615,50 @@
         "lib/netstandard2.0/ConcurrentCollections.xml"
       ]
     },
-    "DSharpPlus/4.0.0-nightly-00783": {
-      "sha512": "EkbhFlZuv6CthRyY8glaKvcRcQzllWTP4jytt4MVwz4ECxF4otpp3NaUGIAWRqRIuNd1oFDPU0BDBZAQRhdnGg==",
+    "DSharpPlus/4.0.0-nightly-00822": {
+      "sha512": "oo9Qcp7ADeMiKx3hXOP6EDpUr06/DtFuDEpQwcSC0Iic8yIT/ggwvsA2eaE0m0VJ3qi1561ZJ2DmJtYBJNAHlA==",
       "type": "package",
-      "path": "dsharpplus/4.0.0-nightly-00783",
+      "path": "dsharpplus/4.0.0-nightly-00822",
       "files": [
         ".nupkg.metadata",
-        "dsharpplus.4.0.0-nightly-00783.nupkg.sha512",
+        "dsharpplus.4.0.0-nightly-00822.nupkg.sha512",
         "dsharpplus.nuspec",
         "lib/netstandard2.0/DSharpPlus.dll",
         "lib/netstandard2.0/DSharpPlus.xml"
       ]
     },
-    "DSharpPlus.CommandsNext/4.0.0-nightly-00783": {
-      "sha512": "CwkIWfCqghFse58M1z/FUmUArbFd2fSRb7SdrXoDlQ4e04DNX0GY7hjnXaRgBip9MYCic+SgG0GRPN5tIRlEVw==",
+    "DSharpPlus.CommandsNext/4.0.0-nightly-00822": {
+      "sha512": "1vKEWS8OVEHHFR0Mv3EfImKssAvLxtikbpQcLaPUJUN7AOSxEgFiaqSeCBP9oxgq0G/f7BakJUySp7w3NOi7ww==",
       "type": "package",
-      "path": "dsharpplus.commandsnext/4.0.0-nightly-00783",
+      "path": "dsharpplus.commandsnext/4.0.0-nightly-00822",
       "files": [
         ".nupkg.metadata",
-        "dsharpplus.commandsnext.4.0.0-nightly-00783.nupkg.sha512",
+        "dsharpplus.commandsnext.4.0.0-nightly-00822.nupkg.sha512",
         "dsharpplus.commandsnext.nuspec",
         "lib/netstandard2.0/DSharpPlus.CommandsNext.dll",
         "lib/netstandard2.0/DSharpPlus.CommandsNext.xml"
       ]
     },
-    "DSharpPlus.Interactivity/4.0.0-nightly-00783": {
-      "sha512": "lb8xnV8Rja6d9YPE976EmVb5+m49JNRBB9vGAUcMlhszPYdlzHfjZFrQu1c8Etvric4KSCQh6cpK7ER9hkcHGg==",
+    "DSharpPlus.Interactivity/4.0.0-nightly-00822": {
+      "sha512": "+iQOYdygP30r0U1l2Xr9kKmJWHiFLCoMK16AJp8GAtbmIwowphwp0WHtATf2alfkCFJ6Wbqnw2bOcdwl6auwZw==",
       "type": "package",
-      "path": "dsharpplus.interactivity/4.0.0-nightly-00783",
+      "path": "dsharpplus.interactivity/4.0.0-nightly-00822",
       "files": [
         ".nupkg.metadata",
-        "dsharpplus.interactivity.4.0.0-nightly-00783.nupkg.sha512",
+        "dsharpplus.interactivity.4.0.0-nightly-00822.nupkg.sha512",
         "dsharpplus.interactivity.nuspec",
         "lib/netstandard2.0/DSharpPlus.Interactivity.dll",
         "lib/netstandard2.0/DSharpPlus.Interactivity.xml"
       ]
     },
-    "Emzi0767.Common/2.2.2": {
-      "sha512": "JhTsAPvDYgy66EO32FuzHUMxNTij4rmO02nF9z59z+HY5ofSEaJ3feH9/TwLNVOD0gOiFvF+EyCoDNJBma9xTA==",
+    "Emzi0767.Common/2.4.1": {
+      "sha512": "sxGvwfRYVZPFXLRdte4lp82khqLQzY5ffCo9ZNSYgIagpbSsHnTbeE99sy1+SsIC3l6sHrA2Pa2huC9u97JUbA==",
       "type": "package",
-      "path": "emzi0767.common/2.2.2",
+      "path": "emzi0767.common/2.4.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "emzi0767.common.2.2.2.nupkg.sha512",
+        "emzi0767.common.2.4.1.nupkg.sha512",
         "emzi0767.common.nuspec",
         "lib/net45/Emzi0767.Common.dll",
         "lib/net45/Emzi0767.Common.xml",
@@ -2666,15 +2666,18 @@
         "system.collections.concurrent.nuspec"
       ]
     },
-    "System.Collections.Immutable/1.7.0": {
-      "sha512": "RVSM6wZUo6L2y6P3vN6gjUtyJ2IF2RVtrepF3J7nrDKfFQd5u/SnSUFclchYQis8/k5scHy9E+fVeKVQLnnkzw==",
+    "System.Collections.Immutable/5.0.0": {
+      "sha512": "FXkLXiK0sVVewcso0imKQoOxjoPAj42R8HtjjbSjVPAzwDfzoyoznWxgA3c38LDbN9SJux1xXoXYAhz98j7r2g==",
       "type": "package",
-      "path": "system.collections.immutable/1.7.0",
+      "path": "system.collections.immutable/5.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
+        "Icon.png",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
+        "lib/net461/System.Collections.Immutable.dll",
+        "lib/net461/System.Collections.Immutable.xml",
         "lib/netstandard1.0/System.Collections.Immutable.dll",
         "lib/netstandard1.0/System.Collections.Immutable.xml",
         "lib/netstandard1.3/System.Collections.Immutable.dll",
@@ -2683,7 +2686,7 @@
         "lib/netstandard2.0/System.Collections.Immutable.xml",
         "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll",
         "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.xml",
-        "system.collections.immutable.1.7.0.nupkg.sha512",
+        "system.collections.immutable.5.0.0.nupkg.sha512",
         "system.collections.immutable.nuspec",
         "useSharedDesignerContext.txt",
         "version.txt"
@@ -4058,18 +4061,18 @@
         "system.runtime.nuspec"
       ]
     },
-    "System.Runtime.CompilerServices.Unsafe/4.7.1": {
-      "sha512": "zOHkQmzPCn5zm/BH+cxC1XbUS3P4Yoi3xzW7eRgVpDR2tPGSzyMZ17Ig1iRkfJuY0nhxkQQde8pgePNiA7z7TQ==",
+    "System.Runtime.CompilerServices.Unsafe/5.0.0": {
+      "sha512": "ZD9TMpsmYJLrxbbmdvhwt9YEgG5WntEnZ/d1eH8JBX9LBp+Ju8BSBhUGbZMNVHHomWo2KVImJhTDl2hIgw/6MA==",
       "type": "package",
-      "path": "system.runtime.compilerservices.unsafe/4.7.1",
+      "path": "system.runtime.compilerservices.unsafe/5.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
-        "lib/net461/System.Runtime.CompilerServices.Unsafe.dll",
-        "lib/net461/System.Runtime.CompilerServices.Unsafe.xml",
+        "lib/net45/System.Runtime.CompilerServices.Unsafe.dll",
+        "lib/net45/System.Runtime.CompilerServices.Unsafe.xml",
         "lib/netcoreapp2.0/System.Runtime.CompilerServices.Unsafe.dll",
         "lib/netcoreapp2.0/System.Runtime.CompilerServices.Unsafe.xml",
         "lib/netstandard1.0/System.Runtime.CompilerServices.Unsafe.dll",
@@ -4082,7 +4085,9 @@
         "ref/netstandard1.0/System.Runtime.CompilerServices.Unsafe.xml",
         "ref/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll",
         "ref/netstandard2.0/System.Runtime.CompilerServices.Unsafe.xml",
-        "system.runtime.compilerservices.unsafe.4.7.1.nupkg.sha512",
+        "ref/netstandard2.1/System.Runtime.CompilerServices.Unsafe.dll",
+        "ref/netstandard2.1/System.Runtime.CompilerServices.Unsafe.xml",
+        "system.runtime.compilerservices.unsafe.5.0.0.nupkg.sha512",
         "system.runtime.compilerservices.unsafe.nuspec",
         "useSharedDesignerContext.txt",
         "version.txt"
@@ -5211,35 +5216,32 @@
     ]
   },
   "packageFolders": {
-    "/Users/ohms/.nuget/packages/": {},
-    "/usr/local/share/dotnet/sdk/NuGetFallbackFolder": {}
+    "C:\\Users\\otoko\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/SmashBotUltimate.csproj",
+      "projectUniqueName": "D:\\Documentos\\Trabajo\\Gaymers\\SmashBotUltimate\\SmashBotUltimate.csproj",
       "projectName": "SmashBotUltimate",
-      "projectPath": "/Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/SmashBotUltimate.csproj",
-      "packagesPath": "/Users/ohms/.nuget/packages/",
-      "outputPath": "/Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/obj/",
+      "projectPath": "D:\\Documentos\\Trabajo\\Gaymers\\SmashBotUltimate\\SmashBotUltimate.csproj",
+      "packagesPath": "C:\\Users\\otoko\\.nuget\\packages\\",
+      "outputPath": "D:\\Documentos\\Trabajo\\Gaymers\\SmashBotUltimate\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
-      ],
       "configFilePaths": [
-        "/Users/ohms/Documents/Proyectos_Propios/SmashBotUltimate/NuGet.Config",
-        "/Users/ohms/.nuget/NuGet/NuGet.Config"
+        "D:\\Documentos\\Trabajo\\Gaymers\\SmashBotUltimate\\NuGet.Config",
+        "C:\\Users\\otoko\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp3.1"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {},
         "https://nuget.emzi0767.com/api/v3/index.json": {}
       },
       "frameworks": {
         "netcoreapp3.1": {
-          "targetAlias": "netcoreapp3.1",
           "projectReferences": {}
         }
       },
@@ -5251,7 +5253,6 @@
     },
     "frameworks": {
       "netcoreapp3.1": {
-        "targetAlias": "netcoreapp3.1",
         "dependencies": {
           "DSharpPlus": {
             "target": "Package",
@@ -5302,8 +5303,40 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/5.0.103/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.301\\RuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "SmashBotUltimate depende de DSharpPlus (>= 4.0.0-nightly-00783), pero no se encontró DSharpPlus 4.0.0-nightly-00783. Se resolvió una mejor coincidencia aproximada de DSharpPlus 4.0.0-nightly-00822.",
+      "libraryId": "DSharpPlus",
+      "targetGraphs": [
+        ".NETCoreApp,Version=v3.1"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "SmashBotUltimate depende de DSharpPlus.CommandsNext (>= 4.0.0-nightly-00783), pero no se encontró DSharpPlus.CommandsNext 4.0.0-nightly-00783. Se resolvió una mejor coincidencia aproximada de DSharpPlus.CommandsNext 4.0.0-nightly-00822.",
+      "libraryId": "DSharpPlus.CommandsNext",
+      "targetGraphs": [
+        ".NETCoreApp,Version=v3.1"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "SmashBotUltimate depende de DSharpPlus.Interactivity (>= 4.0.0-nightly-00783), pero no se encontró DSharpPlus.Interactivity 4.0.0-nightly-00783. Se resolvió una mejor coincidencia aproximada de DSharpPlus.Interactivity 4.0.0-nightly-00822.",
+      "libraryId": "DSharpPlus.Interactivity",
+      "targetGraphs": [
+        ".NETCoreApp,Version=v3.1"
+      ]
+    }
+  ]
 }
