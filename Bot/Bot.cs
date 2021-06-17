@@ -14,6 +14,7 @@ using SmashBotUltimate.Bot.Modules.DBContextService;
 using SmashBotUltimate.Models;
 namespace SmashBotUltimate.Bot {
     public class SmashBot {
+        public const string PREFIX = "/";
         public DiscordClient Client { get; set; }
 
         public CommandsNextExtension Commands { get; set; }
@@ -27,7 +28,6 @@ namespace SmashBotUltimate.Bot {
         public SmashBot (IServiceProvider services) {
             DBService = (PlayerDBService) services.GetService (typeof (PlayerDBService));
             Lobby = (LobbyService) services.GetService (typeof (ILobbyService));
-            const string tokenKey = "smashbot_token";
             string token = "";
 #if CONFIG_FILE
             const string path = "config.json";
@@ -35,11 +35,11 @@ namespace SmashBotUltimate.Bot {
                 new BotConfig ().Save (path);
 
                 return;
-            }
-            else {
+            } else {
                 token = BotConfig.FromFile (path).Token;
             }
 #else
+            const string tokenKey = "smashbot_token";
             token = Environment.GetEnvironmentVariable (tokenKey);
             if (string.IsNullOrEmpty (token)) {
                 Console.WriteLine ($"El token {tokenKey} debe estar registrado en las variables de entorno! El bot no se inició");
@@ -65,7 +65,7 @@ namespace SmashBotUltimate.Bot {
             });
 
             var commandsConfig = new CommandsNextConfiguration {
-                StringPrefixes = new string[] { "s!", "!!" },
+                StringPrefixes = new string[] { PREFIX },
                 EnableDms = false,
                 EnableMentionPrefix = true,
                 Services = services

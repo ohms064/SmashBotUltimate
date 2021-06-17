@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using SmashBotUltimate.Bot;
 using SmashBotUltimate.Bot.Modules.SavedDataServices;
 using SmashBotUltimate.Bot.Validators;
 using SmashBotUltimate.Controllers;
@@ -54,8 +55,7 @@ namespace SmashBotUltimate.Bot.Modules {
         }
 
         public async Task OnMessage (DiscordClient client, MessageCreateEventArgs args) {
-            if (args.Author.IsBot ||
-                args.Message.Content.StartsWith ("s!") || args.Message.Content.StartsWith ("!!")) return;
+            if (args.Author.IsBot || args.Message.Content.StartsWith (SmashBot.PREFIX)) return;
             var authorId = args.Author.Id;
 
             if (await ValidateArena (authorId, args.Message.Content, args.Message.Timestamp, args.Guild, args.Channel, args.Author)) {

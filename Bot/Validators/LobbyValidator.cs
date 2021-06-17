@@ -5,7 +5,7 @@ namespace SmashBotUltimate.Bot.Validators {
 
         private const string arenaIdPattern = @"(\w{5})";
         private const string arenaPassPattern = @"(\d{1,8})";
-        private const string arenaCompletePattern = @"\b(\w{5})\s?(/|-)\s?(\d{1,8})\b";
+        private const string arenaCompletePattern = @"(\w{5})\s?(/|-)\s?(\d{1,8})(.*)";
 
         private Regex _completeRegex, _passRegex, _idRegex;
 
@@ -42,9 +42,12 @@ namespace SmashBotUltimate.Bot.Validators {
         public bool IsComplete (string args, out Lobby lobby) {
             var match = _completeRegex.Match (args);
             lobby = new Lobby ();
+            var comment = match.Groups[3].Value;
+            comment = string.IsNullOrWhiteSpace (comment) ? "" : comment;
             if (match.Success) {
                 lobby.RoomId = match.Groups[1].Value;
                 lobby.Password = match.Groups[3].Value;
+                lobby.Comment = comment;
                 return true;
             }
             return false;
