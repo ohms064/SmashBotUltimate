@@ -5,7 +5,7 @@ namespace SmashBotUltimate.Bot.Validators {
 
         private const string arenaIdPattern = @"(\w{5})";
         private const string arenaPassPattern = @"(\d{1,8})";
-        private const string arenaCompletePattern = @"(\w{5})\s?(/|-)\s?(\d{1,8})(.*)";
+        private const string arenaCompletePattern = @"^(\w{5})\s?(/|-)\s?(\d{1,8})(.*)";
 
         private Regex _completeRegex, _passRegex, _idRegex;
 
