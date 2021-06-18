@@ -42,7 +42,7 @@ namespace SmashBotUltimate.Bot.Validators {
         public bool IsComplete (string args, out Lobby lobby) {
             var match = _completeRegex.Match (args);
             lobby = new Lobby ();
-            var comment = match.Groups[3].Value;
+            var comment = match.Groups[4].Value;
             comment = string.IsNullOrWhiteSpace (comment) ? "" : comment;
             if (match.Success) {
                 lobby.RoomId = match.Groups[1].Value;

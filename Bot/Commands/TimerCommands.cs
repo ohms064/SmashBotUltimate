@@ -7,12 +7,13 @@ using DSharpPlus.Entities;
 using SmashBotUltimate.Bot.Modules.SavedDataServices;
 
 namespace SmashBotUltimate.Bot.Commands {
-    [Group ("alarma")]
+
     public class TimerCommands : BaseCommandModule {
 
         public ISavedData<object, TimerData> Timer { get; set; }
 
-        [Command ("iniciar")]
+        [Command ("temporizador")]
+        [Description ("Crea un temporizador para un recordatorio.")]
         private async Task Minutos (CommandContext context, string args, [RemainingText] string description) {
             if (!int.TryParse (args, out int minutes)) return;
 
@@ -24,13 +25,16 @@ namespace SmashBotUltimate.Bot.Commands {
             await context.RespondAsync ($"Se agregó el temporizador {context.Member.Mention}!");
         }
 
-        [Command ("cancelar")]
-        [Aliases ("terminar")]
+        [Command ("terminar")]
+        [Description ("Borra un temporizador que se haya creado.")]
         private async Task Cancelar (CommandContext context) {
             var key = GetKey (context);
-            if (!Timer.HasData (key)) return;
+            if (!Timer.HasData (key)) {
+                await context.RespondAsync ("No existe el temporizador");
+                return;
+            }
             Timer.RemoveData (key);
-            await context.RespondAsync ("Se canceló la alarma");
+            await context.RespondAsync ("Se canceló el temporizador");
         }
 
         private object GetKey (CommandContext context) {

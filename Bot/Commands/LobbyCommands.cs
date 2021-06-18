@@ -8,7 +8,7 @@ using SmashBotUltimate.Bot.Converters;
 using SmashBotUltimate.Bot.Modules;
 using SmashBotUltimate.Models;
 namespace SmashBotUltimate.Bot.Commands {
-    [Group ("arena")]
+
     public class LobbyCommands : BaseCommandModule {
 
         public ILobbyService Lobby { get; set; }
@@ -16,22 +16,24 @@ namespace SmashBotUltimate.Bot.Commands {
         public IConvert<Lobby> Converter { get; set; }
 
         [Command ("nueva")]
-        [Aliases ("agregar", "add")]
+        [Aliases ("abrir", "new")]
+        [Description ("Crea una nueva arena con un identicador. La contraseña y comentarios son opcionales.")]
         private async Task CreateArena (CommandContext context, [RemainingText] string args) {
             if (!Converter.Convert (args, context, out Lobby data)) return;
             await Lobby.AddArena (data);
             await context.RespondAsync ("Se registró la sala!");
         }
 
-        [Command ("comentario")]
+        //[Command ("comentario")]
+        //[Description ("Actualiza el comentario de tu arena registrada.")]
         private async Task ChangeComment (CommandContext context, [RemainingText] string comment) {
             await Lobby.ChangeComment (context.Guild, context.Channel, context.User, comment);
             await context.RespondAsync ("Se actualizó el comentario!");
         }
 
-        [Command ("buscar")]
-        [Aliases ("find", "encontrar")]
-        [Description ("Finds any registered areanas")]
+        [Command ("arena")]
+        [Aliases ("find", "encontrar", "buscar", "arenas")]
+        [Description ("Muestra las arenas registradas.")]
         private async Task FindArena (CommandContext context) {
             var specialArena = context.Channel.IsSpecialChannel ();
             var arenas = await Lobby.GetArenas (context.Guild, context.Channel, context.Message.Timestamp, specialArena);
@@ -66,8 +68,8 @@ namespace SmashBotUltimate.Bot.Commands {
 
         }
 
-        [Command ("force-close")]
-        [Aliases ("forzar-cierre")]
+        //[Command ("force-close")]
+        //[Aliases ("forzar-cierre")]
         private async Task CloseArena (CommandContext context, DiscordMember closingMember) {
             var arena = await Lobby.Pop (context.Guild.Id, context.Channel.Id, context.User.Id);
             if (arena != null) {
@@ -76,13 +78,14 @@ namespace SmashBotUltimate.Bot.Commands {
         }
 
         [Command ("cerrar")]
-        [Aliases ("close", "terminar", "borrar")]
+        [Aliases ("close")]
+        [Description ("Cierrar tu arena registrada")]
         private async Task CloseArena (CommandContext context) {
             await CloseArena (context, context.Member);
         }
 
-        [Command ("reset")]
-        [Aliases ("reiniciar")]
+        //[Command ("reset")]
+        //[Aliases ("reiniciar")]
         private async Task ResetArena (CommandContext context) {
             if (await Lobby.ResetTimer (context.Guild, context.Channel, context.User, context.Message.Timestamp)) {
                 await context.RespondAsync ($"Se reinició la arena de {context.User.Mention}.");

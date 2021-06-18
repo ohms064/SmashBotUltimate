@@ -1,4 +1,4 @@
-#define CONFIG_FILE
+//#define CONFIG_FILE
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -14,7 +14,7 @@ using SmashBotUltimate.Bot.Modules.DBContextService;
 using SmashBotUltimate.Models;
 namespace SmashBotUltimate.Bot {
     public class SmashBot {
-        public const string PREFIX = "/";
+        public const string PREFIX = "s!";
         public DiscordClient Client { get; set; }
 
         public CommandsNextExtension Commands { get; set; }
@@ -35,7 +35,8 @@ namespace SmashBotUltimate.Bot {
                 new BotConfig ().Save (path);
 
                 return;
-            } else {
+            }
+            else {
                 token = BotConfig.FromFile (path).Token;
             }
 #else
@@ -75,7 +76,7 @@ namespace SmashBotUltimate.Bot {
 
             //commands.RegisterCommands<ReportCommands> ();
             //commands.RegisterCommands<InfoCommands> ();
-            commands.RegisterCommands<UtilsCommands> ();
+            //commands.RegisterCommands<UtilsCommands> ();
             //commands.RegisterCommands<SmashfestCommands> ();
             commands.RegisterCommands<LobbyCommands> ();
             //commands.RegisterCommands<DebugCommands> ();
